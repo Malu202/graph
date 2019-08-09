@@ -3,6 +3,7 @@ var DARK_PRIMARY = "#087f23";
 var LIGHT_PRIMARY = "#80e27e";
 var WHITE = "#FFFFFF";
 var TRANSPARENT = "rgba(1, 1, 1, 0)";
+var RED = "#FF0000"
 
 var BACKGROUND_COLOR = PRIMARY;
 
@@ -30,28 +31,41 @@ var generateMockupData = function () {
         dataX.push(j);
         dataY.push(y);
 
-        if (Math.random() < 0.1) {
+        if (Math.random() < 0.5) {
             highlightDataX.push(j);
             highlightDataY.push(y);
         }
     }
 }
 generateMockupData();
-
+generateMockupData2();
 function generateMockupData2() {
-    
+    highlightDataX = [];
+    highlightDataY = [];
+
+    var steps = 100;
+    var stepSize = 4 / (steps - 1);
+    for (var i = -2; i <= 2; i += stepSize) {
+        if (Math.random() < 0.5) {
+            j = i + (Math.random() - Math.random()) * 0.5 * stepSize;
+            y = 8 * Math.exp(-(j + 1) * (j + 1)) + 25;
+            highlightDataX.push(j);
+            highlightDataY.push(y);
+        }
+    }
 }
 
-var ctx;
-var height;
-var width;
-var a;
-function draw() {
-    var canvas = document.getElementById("canvas");
+// var a;
+var can = document.getElementById("canvas");
+window.onload = function(){
+    draw(can);
+};
+function draw(canvas) {
     if (canvas.getContext) {
-        ctx = canvas.getContext("2d");
-        height = canvas.height;
-        width = canvas.width;
+
+        var ctx = canvas.getContext("2d");
+        var height = canvas.height;
+        var width = canvas.width;
 
         canvas.style["background-color"] = BACKGROUND_COLOR;
 
@@ -68,10 +82,15 @@ function draw() {
 
         var bottom = height;
 
+        var xCoordinates = scaleCoordinates(dataX, x_scaling, zerolineX);
+        var yCoordinates = scaleAndInvertCoordinates(dataY, y_scaling, zerolineY, bottomOffset, height);
 
-        drawShadowInterpolation(dataX, dataY, x_scaling, y_scaling, zerolineX, zerolineY, bottomOffset, height, bottom);
-        drawLineInterpolation(dataX, dataY, x_scaling, y_scaling, zerolineX, zerolineY, bottomOffset, height);
-        drawDataPoints(highlightDataX, highlightDataY, x_scaling, y_scaling, zerolineX, zerolineY, bottomOffset, height);
+        var xCoordinatesHighlight = scaleCoordinates(highlightDataX, x_scaling, zerolineX);
+        var yCoordinatesHighlight = scaleAndInvertCoordinates(highlightDataY, y_scaling, zerolineY, bottomOffset, height);
+
+        drawLineInterpolation(xCoordinates, yCoordinates, ctx);
+        drawDataPoints(xCoordinatesHighlight, yCoordinatesHighlight, WHITE, DATA_POINT_RADIUS, 2, ctx);
+        drawShadowInterpolation(xCoordinates, yCoordinates, bottom, ctx);
     }
 }
 
@@ -90,33 +109,40 @@ function scaleAndInvertCoordinates(data, scaling, zeroline, bottomOffset, height
     return scaled;
 }
 
-var drawDataPoint = function (x, y) {
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = WHITE;
+var drawDataPoint = function (x, y, color, radius, linewidth, ctx) {
+    ctx.lineWidth = linewidth;
+    ctx.strokeStyle = color;
     ctx.beginPath();
-    ctx.arc(x, y, DATA_POINT_RADIUS, 0, Math.PI * 2, true);
-    ctx.fillStyle = WHITE;
+    ctx.arc(x, y, radius, 0, Math.PI * 2, true);
+    ctx.fillStyle = TRANSPARENT;
     ctx.fill();
     ctx.stroke();
+
+    ctx.strokeStyle = "rgb(255, 255, 255)";
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.fillStyle = "rgba(255,255,255,255)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(x, y, radius - linewidth, 0, Math.PI * 2, true);
+    ctx.fill();
+    ctx.stroke();
+    ctx.globalCompositeOperation = "source-over";
 }
 
-var drawLineInterpolation = function (dataX, dataY, x_scaling, y_scaling, zerolineX, zerolineY, bottomOffset, height) {
-    var xCoordinates = scaleCoordinates(dataX, x_scaling, zerolineX);
-    var yCoordinates = scaleAndInvertCoordinates(dataY, y_scaling, zerolineY, bottomOffset, height);
+var drawLineInterpolation = function (xCoordinates, yCoordinates, ctx) {
 
     ctx.lineWidth = LINE_THICKNESS;
     ctx.strokeStyle = WHITE;
-    for (var i = 0; i < xCoordinates.length; i++) {
+    for (var i = 0; i < xCoordinates.length - 1; i++) {
         ctx.beginPath();
         ctx.moveTo(xCoordinates[i], yCoordinates[i]);
         ctx.lineTo(xCoordinates[i + 1], yCoordinates[i + 1]);
         ctx.stroke();
     }
 }
-var drawShadowInterpolation = function (dataX, dataY, x_scaling, y_scaling, zerolineX, zerolineY, bottomOffset, height, bottom) {
-    var xCoordinates = scaleCoordinates(dataX, x_scaling, zerolineX);
-    var yCoordinates = scaleAndInvertCoordinates(dataY, y_scaling, zerolineY, bottomOffset, height);
+var drawShadowInterpolation = function (xCoordinates, yCoordinates, bottom, ctx) {
 
+    ctx.globalCompositeOperation = "destination-over";
     ctx.lineWidth = 1;
     ctx.strokeStyle = LIGHT_PRIMARY;
     ctx.fillStyle = LIGHT_PRIMARY;
@@ -130,11 +156,12 @@ var drawShadowInterpolation = function (dataX, dataY, x_scaling, y_scaling, zero
         ctx.fill();
         ctx.stroke();
     }
+    ctx.globalCompositeOperation = "source-over";
+
 }
-function drawDataPoints(dataX, dataY, x_scaling, y_scaling, zerolineX, zerolineY, bottomOffset, height){
-    var xCoordinates = scaleCoordinates(dataX, x_scaling, zerolineX);
-    var yCoordinates = scaleAndInvertCoordinates(dataY, y_scaling, zerolineY, bottomOffset, height);
+function drawDataPoints(xCoordinates, yCoordinates, color, radius, linewidth, ctx) {
+
     for (var i = 0; i < xCoordinates.length; i++) {
-        drawDataPoint(xCoordinates[i],yCoordinates[i]);
+        drawDataPoint(xCoordinates[i], yCoordinates[i], color, radius, linewidth, ctx);
     }
 }
