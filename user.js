@@ -29,9 +29,9 @@ var generateMockupData = function (offsetX, offsetY, scale, steps) {
         yHighlight: highlightDataY
     }
 }
-
-var mockupGraph1 = generateMockupData(0, -0.5, 1, 48);
-var mockupGraph2 = generateMockupData(1, 0, 0.8, 48);
+var zeroToFour = Math.random() * 4;
+var mockupGraph1 = generateMockupData(0, 25, 4 + zeroToFour, 48);
+var mockupGraph2 = generateMockupData(1, 25, 4 + zeroToFour, 48);
 
 
 var can = document.getElementById("canvas");
@@ -42,6 +42,9 @@ window.onload = function () {
         backgroundColor: PRIMARY,
         topMargin: 0.1,
         bottomMargin: 0.1,
+        axisSize: 0.05,
+        xAxisLabelDecimals: 3,
+        yAxisLabelDecimals: 0,
         graphs: [
             {
                 type: "line",
@@ -49,10 +52,17 @@ window.onload = function () {
                 linewidth: 5,
                 dataPointRadius: 4,
                 dataPointLinewidth: 2,
-                x: mockupGraph1.x,
-                y: mockupGraph1.y,
-                xHighlight: mockupGraph1.xHighlight,
-                yHighlight: mockupGraph1.yHighlight
+                // x: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+                // y: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+                
+                x: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900],
+                y: [25, 27, 27, 28, 29, 30, 36, 35, 30, 30],
+                xHighlight: [],
+                yHighlight: []
+                // x: mockupGraph1.x,
+                // y: mockupGraph1.y,
+                // xHighlight: mockupGraph1.xHighlight,
+                // yHighlight: mockupGraph1.yHighlight
             },
             {
                 type: "shadow",
@@ -60,10 +70,14 @@ window.onload = function () {
                 shadowColor: LIGHT_PRIMARY,
                 linewidth: 4,
                 dataPointRadius: 1.5,
-                x: mockupGraph2.x,
-                y: mockupGraph2.y,
-                xHighlight: mockupGraph2.xHighlight,
-                yHighlight: mockupGraph2.yHighlight
+                x: [],
+                y: [],
+                xHighlight: [],
+                yHighlight: []
+                // x: mockupGraph2.x,
+                // y: mockupGraph2.y,
+                // xHighlight: mockupGraph2.xHighlight,
+                // yHighlight: mockupGraph2.yHighlight
             }
         ]
     })
