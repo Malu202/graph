@@ -35,7 +35,7 @@ var mockupGraph2 = generateMockupData(1, 25, 4 + zeroToFour, 48);
 
 var mockupData = [25.9, 27, 27, 28, 29, 30, 37.5, 35, 30, 30];
 mockupData.forEach(function(value, index){
-    mockupData[index]*=0.02;
+    mockupData[index]*=1;
 })
 var can = document.getElementById("canvas");
 var plot;
@@ -47,9 +47,9 @@ window.onload = function () {
         bottomMargin: 0.1,
         axisSize: 0.1,
         xAxisLabelMaxDecimals: 3,
-        yAxisLabelMaxDecimals: 1,
+        yAxisLabelMaxDecimals: 0,
         xAxisMaxLabels: 11,
-        yAxisMaxLabels: 5,
+        yAxisMaxLabels: 6,
         graphs: [
             {
                 type: "line",

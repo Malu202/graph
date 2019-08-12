@@ -51,7 +51,6 @@ Plot.prototype.calculateDataRanges = function (minPlottingX, minPlottingY, maxPl
     this.longestLabelX = (round(this.maxX, 0).toString()).length;
     this.longestLabelY = (round(this.maxY, 0).toString()).length;
     if (this.yAxisLabelMaxDecimals > 0) this.longestLabelY += this.yAxisLabelMaxDecimals;
-    console.log(("longestLabelY: " + this.longestLabelY));
 
     this.xScaling = this.width / this.xPlottingRange;
     this.yScaling = this.height / this.yPlottingRange;
@@ -86,101 +85,79 @@ Plot.prototype.calculateDrawingProperties = function () {
     this.xAxisWidth = this.leftOffset;
 
     this.labelHeight = (this.xAxisWidth / 2) * (2 / (this.longestLabelY + 1));
-    console.log("labelheight: " + this.labelHeight)
     this.gridLineCount = this.yPlottingRange * Math.pow(10, this.yAxisLabelMaxDecimals) + 1;
     this.gridLineCount = round(this.gridLineCount, 0)
-    // console.log("old gridLineCount: " + this.gridLineCount)
     this.dataStepSize = this.yPlottingRange / (this.gridLineCount - 1);
     var originalStepSize = this.dataStepSize;
     this.drawingStepSize = this.xAxisHeight / (this.gridLineCount - 1);
-    console.log("old data STep size: " + this.dataStepSize)
 
     if (this.drawingStepSize < this.labelHeight || this.gridLineCount > this.yAxisMaxLabels) {
-        console.log(this.drawingStepSize);
-        console.log(this.labelHeight);
-        console.log(this.gridLineCount);
-        console.log(this.yAxisMaxLabels)
-        var idealNewGridLineCount;
-        if (this.gridLineCount < this.yAxisMaxLabels) {
-            var overSizeFactor = (this.labelHeight / this.drawingStepSize);
-            this.numberOfLabelsToRemove = (this.gridLineCount - this.gridLineCount / overSizeFactor);
-            idealNewGridLineCount = this.gridLineCount - this.numberOfLabelsToRemove;
-        } else idealNewGridLineCount = this.yAxisMaxLabels;
+        var range = this.yPlottingRange * Math.pow(10, this.yAxisLabelMaxDecimals);
 
-        //n...number of decimals that need to be removed to fit all labels
-        //var n = Math.ceil(this.gridLineCount / (10 * idealNewGridLineCount));
-        var n = Math.ceil(Math.log(idealNewGridLineCount / this.gridLineCount) / Math.log(0.1));
-        console.log("n=" + n)
+        var groeszenordnung = ceilToDecimals(range, -1);
 
-        this.yAxisLabelDecimals = this.yAxisLabelMaxDecimals - n;
-        console.log("rescaled decimals from " + this.yAxisLabelMaxDecimals + " to " + this.yAxisLabelDecimals);
+        var preferredLabelSteps = [2, 5, 10, 20, 25];
+        var labelSteps = []
+        var closestStepping;
+        var lowestError = Infinity;
+        var lowestErrorTop = Infinity;
+        var lowestErrorBottom = Infinity;
+        var foundBestSolution = false;
+        for (var j = 0; j < range && !foundBestSolution; j++) {
+            preferredLabelSteps.forEach(function (label, index) {
+                labelSteps[index] = preferredLabelSteps[index] * Math.pow(10, j);
+            });
+            console.log("j: " + j)
+            console.log(labelSteps)
+            for (var i = 0; i < labelSteps.length; i++) {
+                console.log("testing: " + labelSteps[i])
+                var errorTop = labelSteps[i] - this.maxY % labelSteps[i];
+                var errorBottom = this.minY % labelSteps[i];
+                var error = errorTop + errorBottom;
 
-        // if (this.yAxisLabelDecimals < 0) this.yAxisLabelDecimals = 0;
-        this.calculateDataRanges();
-        this.gridLineCount = this.yPlottingRange * Math.pow(10, this.yAxisLabelDecimals) + 1;
-        // console.log("new gridLineCount: " + this.gridLineCount)
-        this.gridLineCount = round(this.gridLineCount, 0)
-        this.dataStepSize = this.yPlottingRange / (this.gridLineCount - 1);
-        this.drawingStepSize = this.xAxisHeight / (this.gridLineCount - 1);
-        console.log("new data Step size: " + this.dataStepSize)
-        if (isPrime(this.dataStepSize) && this.gridLineCount < this.yAxisMaxLabels) {
-            console.log("prime recalc " + this.dataStepSize)
-            console.log("fucker: " + (this.maxPlottingY + (this.yPlottingRange / (this.gridLineCount - 1))));
-            this.calculateDataRanges(null, null, null, this.maxPlottingY + originalStepSize);
-            this.dataStepSize = this.yPlottingRange / (this.gridLineCount - 1);
-            this.drawingStepSize = this.xAxisHeight / (this.gridLineCount - 1);
-            this.gridLineCount = round(this.yPlottingRange * Math.pow(10, this.yAxisLabelDecimals) + 1, 0)
-        }
-        console.log("prime recalc " + this.dataStepSize)
+                var minY = this.minY - errorBottom;
 
-        // if (this.yAxisLabelDecimals < 0) this.yAxisLabelDecimals = 0;
-        for (var i = 10; i > 1; i--) {
-            console.log("trying " + this.dataStepSize / i);
-            //überprpfen ob eine "runde" zahl im rahmen der darstellungsnachkommastellen            
-            if (isWholeNumber(this.dataStepSize / i, this.yAxisLabelMaxDecimals) && (this.gridLineCount + (this.gridLineCount - 1) * (i - 1) <= this.yAxisMaxLabels)) {
-                if (this.drawingStepSize / i > this.labelHeight) {
-                    this.dataStepSize /= i;
-                    this.drawingStepSize /= i;
-                    this.gridLineCount += (this.gridLineCount - 1) * (i - 1);
-                    console.log("inserted additional lines (" + i + ")");
+                var maxY = this.maxY + errorTop;
+                var gridLineCount = ((maxY - minY) / labelSteps[i]) + 1;
+                var drawingStepSize = this.xAxisHeight / (gridLineCount - 1);
+                console.log("drawingStepSize: " + drawingStepSize)
+                console.log("labelHeight: " + this.labelHeight)
+                console.log("gridLineCount: " + gridLineCount)
+
+
+                if (gridLineCount <= this.yAxisMaxLabels && drawingStepSize >= this.labelHeight) {
+                    foundBestSolution = true;
+                    lowestError = error;
+                    lowestErrorTop = errorTop;
+                    lowestErrorBottom = errorBottom;
+                    closestStepping = labelSteps[i];
+                    this.minY = minY;
+                    this.maxY = maxY;
+                    this.gridLineCount = gridLineCount;
+                    console.log("ez")
                     break;
                 }
             }
         }
     }
-    // console.log(this.yAxisMaxLabels)
-    // console.log("gridLinecount= " + this.gridLineCount)
+    this.calculateDataRanges(null, this.minY, null, this.maxY);
 
-    // if (this.yAxisMaxLabels < this.gridLineCount) {
-    //     this.labelsToRemoveByUserChoice = this.gridLineCount - this.yAxisMaxLabels;
-    //     console.log("too many labels for user: " + this.labelsToRemoveByUserChoice);
-    //     var minimumReductionFactor = Math.ceil((this.gridLineCount / (this.gridLineCount - this.labelsToRemoveByUserChoice)));
-    //     console.log("minimum Reduction factor= " + minimumReductionFactor);
+    this.dataStepSize = closestStepping;
+    this.drawingStepSize = this.xAxisHeight / (this.gridLineCount - 1);
 
-    //     for (var i = minimumReductionFactor; i < this.gridLineCount; i++) {
-    //         var dataStepSize = this.dataStepSize * i;
-    //         var gridLineCount = (this.gridLineCount-1)/i;
-    //         console.log("gridLinecount= " + gridLineCount)
-    //         console.log("new gridLineCount = " + (gridLineCount-1)/i)
-    //         if (isWholeNumber(gridLineCount / i, 0)) {
-    //             this.dataStepSize *= i;
-    //             this.drawingStepSize *= i;
-    //             this.gridLineCount = (this.gridLineCount-1)/i +1;
-    //             break;
-    //         }
-    //         // if (i == ) {
-    //         //     this.dataStepSize *= 10 * i;
-    //         //     this.drawingStepSize *= this.labelsToRemoveByUserChoice * i;
-    //         //     this.gridLineCount -= (this.gridLineCount - 1) * (this.labelsToRemoveByUserChoice * i - 1);
-    //         // }
+    console.log("closestStepping " + closestStepping)
+    console.log("lowestErrorTop " + lowestErrorTop)
+    console.log("lowestErrorBottom " + lowestErrorBottom)
+    var a = this.minY;
+    console.log("minY " + a)
+    console.log("maxY " + this.maxY)
 
-    //     }
+    console.log("gridlinecount " + this.gridLineCount)
 
-    // }
+
 };
 var WHOLE_NUMBER_DECIMAL_TOLERANCE = 5;
 function isWholeNumber(number, decimalOffset) {
-    // console.log("überprüfe ob " + round(number, decimalOffset + WHOLE_NUMBER_DECIMAL_TOLERANCE) + " == " + round(number, decimalOffset))
     return round(number, decimalOffset + WHOLE_NUMBER_DECIMAL_TOLERANCE) == round(number, decimalOffset);
 }
 Plot.prototype.draw = function () {
@@ -215,38 +192,6 @@ function scaleAndInvertCoordinates(data, scaling, zeroline, bottomOffset, height
 }
 
 Plot.prototype.drawAxis = function () {
-
-
-    // if (drawingStepSize < labelHeight) {
-    //     var overSizeFactor = (labelHeight / drawingStepSize);
-    //     var numberOfLabelsToRemove = (gridLineCount - gridLineCount/overSizeFactor);
-    //     var idealNewGridLineCount = gridLineCount - numberOfLabelsToRemove;
-
-    //     //n...number of times every 2nd element needs to be removed
-    //     var n = Math.ceil(gridLineCount / (2 * idealNewGridLineCount));
-
-    //     gridLineCount /= 2*n;
-    //     dataStepSize *= 2*n;
-    //     drawingStepSize *= 2*n;
-
-    //     // gridLineCount /= overSizeFactor;
-    //     // dataStepSize *= overSizeFactor;
-    //     // drawingStepSize *= overSizeFactor;
-    //     console.log("ideal new gridLineCount: " + idealNewGridLineCount)
-    //     console.log("overSizeFactor: " + overSizeFactor)
-    //     console.log("number of Labels to Remove: " + numberOfLabelsToRemove)
-    //     console.log("n: " + n)
-    //     console.log("oversize Factor: " + overSizeFactor)
-    //     console.log("to many labels, removing stuff and rescaling")
-    //     console.log("new gridLineCount: " + gridLineCount)
-    // }
-    // console.log("dataStepSize: " + dataStepSize)
-    // console.log("yPlottingRange: " + this.yPlottingRange)
-    // console.log(this.minY)
-    // console.log(this.maxY)
-
-    // console.log("label Values: ")
-    console.log(this)
     for (var i = 0; i < this.gridLineCount; i += 1) {
         var y = this.topOffset + this.xAxisHeight - i * this.drawingStepSize;
 
