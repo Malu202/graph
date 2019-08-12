@@ -33,7 +33,10 @@ var zeroToFour = Math.random() * 4;
 var mockupGraph1 = generateMockupData(0, 25, 4 + zeroToFour, 48);
 var mockupGraph2 = generateMockupData(1, 25, 4 + zeroToFour, 48);
 
-
+var mockupData = [25.9, 27, 27, 28, 29, 30, 37.5, 35, 30, 30];
+mockupData.forEach(function(value, index){
+    mockupData[index]*=0.02;
+})
 var can = document.getElementById("canvas");
 var plot;
 window.onload = function () {
@@ -42,9 +45,11 @@ window.onload = function () {
         backgroundColor: PRIMARY,
         topMargin: 0.1,
         bottomMargin: 0.1,
-        axisSize: 0.05,
-        xAxisLabelDecimals: 3,
-        yAxisLabelDecimals: 0,
+        axisSize: 0.1,
+        xAxisLabelMaxDecimals: 3,
+        yAxisLabelMaxDecimals: 1,
+        xAxisMaxLabels: 11,
+        yAxisMaxLabels: 5,
         graphs: [
             {
                 type: "line",
@@ -56,7 +61,7 @@ window.onload = function () {
                 // y: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
                 
                 x: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900],
-                y: [25, 27, 27, 28, 29, 30, 36, 35, 30, 30],
+                y: mockupData,
                 xHighlight: [],
                 yHighlight: []
                 // x: mockupGraph1.x,
