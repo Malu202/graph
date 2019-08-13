@@ -29,14 +29,14 @@ var generateMockupData = function (offsetX, offsetY, scale, steps) {
         yHighlight: highlightDataY
     }
 }
-var zeroToFour = Math.random() * 4;
-var mockupGraph1 = generateMockupData(0, 25, 4 + zeroToFour, 48);
-var mockupGraph2 = generateMockupData(1, 25, 4 + zeroToFour, 48);
+var zeroToFour = Math.random() * 0.04;
+var mockupGraph1 = generateMockupData(0, 0, zeroToFour, 48);
+var mockupGraph2 = generateMockupData(1, 0, zeroToFour, 48);
 
-var mockupData = [25.9, 27, 27, 28, 29, 30, 37.5, 35, 30, 30];
-mockupData.forEach(function(value, index){
-    mockupData[index]*=1;
-})
+// var mockupData = [25.9, 27, 27, 28, 29, 30, 37.5, 35, 30, 30];
+// mockupData.forEach(function(value, index){
+//     mockupData[index]*=1;
+// })
 var can = document.getElementById("canvas");
 var plot;
 window.onload = function () {
@@ -45,11 +45,15 @@ window.onload = function () {
         backgroundColor: PRIMARY,
         topMargin: 0.1,
         bottomMargin: 0.1,
-        axisSize: 0.1,
-        xAxisLabelMaxDecimals: 3,
-        yAxisLabelMaxDecimals: 0,
+        axisSize: 0.05,
+        xAxisLabelMaxDecimals: 10,
+        yAxisLabelMaxDecimals: 2,
+        yAxisLabelSuffix: "°",
+        yAxisLabelPrefix: "",
+        xAxisLabelSuffix: "",
+        xAxisLabelPrefix: "",
         xAxisMaxLabels: 11,
-        yAxisMaxLabels: 6,
+        yAxisMaxLabels: 5,
         graphs: [
             {
                 type: "line",
@@ -60,30 +64,31 @@ window.onload = function () {
                 // x: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
                 // y: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
                 
-                x: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900],
-                y: mockupData,
-                xHighlight: [],
-                yHighlight: []
-                // x: mockupGraph1.x,
-                // y: mockupGraph1.y,
-                // xHighlight: mockupGraph1.xHighlight,
-                // yHighlight: mockupGraph1.yHighlight
-            },
-            {
-                type: "shadow",
-                color: WHITE,
-                shadowColor: LIGHT_PRIMARY,
-                linewidth: 4,
-                dataPointRadius: 1.5,
-                x: [],
-                y: [],
-                xHighlight: [],
-                yHighlight: []
-                // x: mockupGraph2.x,
-                // y: mockupGraph2.y,
-                // xHighlight: mockupGraph2.xHighlight,
-                // yHighlight: mockupGraph2.yHighlight
+                // x: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900],
+                // y: mockupData,
+                // xHighlight: [],
+                // yHighlight: []
+                x: mockupGraph1.x,
+                y: mockupGraph1.y,
+                xHighlight: mockupGraph1.xHighlight,
+                yHighlight: mockupGraph1.yHighlight
             }
+            // ,
+            // {
+            //     type: "shadow",
+            //     color: WHITE,
+            //     shadowColor: LIGHT_PRIMARY,
+            //     linewidth: 4,
+            //     dataPointRadius: 1.5,
+            //     x: [],
+            //     y: [],
+            //     xHighlight: [],
+            //     yHighlight: []
+            //     x: mockupGraph2.x,
+            //     y: mockupGraph2.y,
+            //     xHighlight: mockupGraph2.xHighlight,
+            //     yHighlight: mockupGraph2.yHighlight
+            // }
         ]
     })
 

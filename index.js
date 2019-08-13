@@ -8,6 +8,10 @@ function Plot(canvas, config) {
     this.yAxisLabelMaxDecimals = config.yAxisLabelMaxDecimals;
     this.xAxisMaxLabels = config.xAxisMaxLabels;
     this.yAxisMaxLabels = config.yAxisMaxLabels;
+    this.yAxisLabelSuffix = config.yAxisLabelSuffix;
+    this.yAxisLabelPrefix = config.yAxisLabelPrefix;
+    this.xAxisLabelSuffix = config.xAxisLabelSuffix;
+    this.xAxisLabelPrefix = config.xAxisLabelPrefix;
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
 
@@ -37,20 +41,22 @@ Plot.prototype.calculateDataRanges = function (minPlottingX, minPlottingY, maxPl
     this.xDataRange = this.maxX - this.minX;
     this.yDataRange = this.maxY - this.minY;
 
+    this.orderY = orderOfMagnitude(this.yDataRange) * 0.1;
+    var minimumOrderY = Math.pow(10, -this.yAxisLabelMaxDecimals);
+    if (minimumOrderY > this.orderY) this.orderY = minimumOrderY;
+    this.decimalsY = -orderToDecimalCount(this.orderY);
+
     if (!minPlottingX) this.minPlottingX = floorToDecimals(Math.min.apply(null, allXData), this.xAxisLabelMaxDecimals);
     else this.minPlottingX = minPlottingX;
-    if (!minPlottingY) this.minPlottingY = floorToDecimals(Math.min.apply(null, allYData), this.yAxisLabelMaxDecimals);
+    if (!minPlottingY) this.minPlottingY = floorToDecimals(Math.min.apply(null, allYData), this.decimalsY);
     else this.minPlottingY = minPlottingY;
     if (!maxPlottingX) this.maxPlottingX = ceilToDecimals(Math.max.apply(null, allXData), this.xAxisLabelMaxDecimals);
     else this.maxPlottingX = maxPlottingX;
-    if (!maxPlottingY) this.maxPlottingY = ceilToDecimals(Math.max.apply(null, allYData), this.yAxisLabelMaxDecimals);
+    if (!maxPlottingY) this.maxPlottingY = ceilToDecimals(Math.max.apply(null, allYData), this.decimalsY);
     else this.maxPlottingY = maxPlottingY;
 
     this.xPlottingRange = this.maxPlottingX - this.minPlottingX;
     this.yPlottingRange = this.maxPlottingY - this.minPlottingY;
-    this.longestLabelX = (round(this.maxX, 0).toString()).length;
-    this.longestLabelY = (round(this.maxY, 0).toString()).length;
-    if (this.yAxisLabelMaxDecimals > 0) this.longestLabelY += this.yAxisLabelMaxDecimals;
 
     this.xScaling = this.width / this.xPlottingRange;
     this.yScaling = this.height / this.yPlottingRange;
@@ -67,11 +73,6 @@ function floorToDecimals(number, decimals) {
 function ceilToDecimals(number, decimals) {
     return Math.ceil(number * Math.pow(10, decimals)) / Math.pow(10, decimals);
 }
-function isPrime(num) {
-    for (let i = 2, s = Math.sqrt(num); i <= s; i++)
-        if (num % i === 0) return false;
-    return num > 1;
-}
 Plot.prototype.scaleData = function () {
     for (var i = 0; i < this.graphs.length; i++) {
         this.graphs[i].xCoordinates = scaleCoordinates(this.graphs[i].x, this.xScaling, this.minPlottingX, this.leftOffset);
@@ -80,85 +81,97 @@ Plot.prototype.scaleData = function () {
         this.graphs[i].yCoordinatesHighlight = scaleAndInvertCoordinates(this.graphs[i].yHighlight, this.yScaling, this.minPlottingY, this.bottomOffset, this.bottom);
     }
 }
+Plot.prototype.calculateLabelHeight = function () {
+    longestValue = round(this.minPlottingY + this.dataStepSize, this.yAxisLabelMaxDecimals).toString().length;
+    this.longestLabelY = longestValue + this.yAxisLabelPrefix.length + this.yAxisLabelSuffix.length;
+    this.longestLabelX = longestValue + this.xAxisLabelPrefix.length + this.xAxisLabelSuffix.length;
+    this.labelHeight = 1.95 * this.xAxisWidth / (this.longestLabelY)
+}
 Plot.prototype.calculateDrawingProperties = function () {
     this.xAxisHeight = this.height - this.topOffset - this.bottomOffset;
     this.xAxisWidth = this.leftOffset;
 
-    this.labelHeight = (this.xAxisWidth / 2) * (2 / (this.longestLabelY + 1));
-    this.gridLineCount = this.yPlottingRange * Math.pow(10, this.yAxisLabelMaxDecimals) + 1;
+    var order = this.orderY;
+
+    this.gridLineCount = this.yPlottingRange / order + 1;
     this.gridLineCount = round(this.gridLineCount, 0)
     this.dataStepSize = this.yPlottingRange / (this.gridLineCount - 1);
-    var originalStepSize = this.dataStepSize;
     this.drawingStepSize = this.xAxisHeight / (this.gridLineCount - 1);
-
-    if (this.drawingStepSize < this.labelHeight || this.gridLineCount > this.yAxisMaxLabels) {
-        var range = this.yPlottingRange * Math.pow(10, this.yAxisLabelMaxDecimals);
-
-        var groeszenordnung = ceilToDecimals(range, -1);
-
-        var preferredLabelSteps = [2, 5, 10, 20, 25];
-        var labelSteps = []
-        var closestStepping;
-        var lowestError = Infinity;
-        var lowestErrorTop = Infinity;
-        var lowestErrorBottom = Infinity;
-        var foundBestSolution = false;
-        for (var j = 0; j < range && !foundBestSolution; j++) {
-            preferredLabelSteps.forEach(function (label, index) {
-                labelSteps[index] = preferredLabelSteps[index] * Math.pow(10, j);
-            });
-            console.log("j: " + j)
-            console.log(labelSteps)
-            for (var i = 0; i < labelSteps.length; i++) {
-                console.log("testing: " + labelSteps[i])
-                var errorTop = labelSteps[i] - this.maxY % labelSteps[i];
-                var errorBottom = this.minY % labelSteps[i];
-                var error = errorTop + errorBottom;
-
-                var minY = this.minY - errorBottom;
-
-                var maxY = this.maxY + errorTop;
-                var gridLineCount = ((maxY - minY) / labelSteps[i]) + 1;
-                var drawingStepSize = this.xAxisHeight / (gridLineCount - 1);
-                console.log("drawingStepSize: " + drawingStepSize)
-                console.log("labelHeight: " + this.labelHeight)
-                console.log("gridLineCount: " + gridLineCount)
+    var longestValue = round(this.minPlottingY + this.dataStepSize, this.yAxisLabelMaxDecimals).toString().length
+    this.longestLabelY = longestValue + this.yAxisLabelPrefix.length + this.yAxisLabelSuffix.length;
+    this.longestLabelX = longestValue + this.xAxisLabelPrefix.length + this.xAxisLabelSuffix.length;
 
 
-                if (gridLineCount <= this.yAxisMaxLabels && drawingStepSize >= this.labelHeight) {
-                    foundBestSolution = true;
-                    lowestError = error;
-                    lowestErrorTop = errorTop;
-                    lowestErrorBottom = errorBottom;
-                    closestStepping = labelSteps[i];
-                    this.minY = minY;
-                    this.maxY = maxY;
-                    this.gridLineCount = gridLineCount;
-                    console.log("ez")
-                    break;
-                }
+    this.calculateLabelHeight();
+    var labelsOverlapping = this.drawingStepSize < this.labelHeight;
+    var moreLabelsThanUserWants = this.gridLineCount > this.yAxisMaxLabels;
+    if (labelsOverlapping || moreLabelsThanUserWants) {
+
+        var preferredLabelSteps = [1, 2, 5, 10, 20, 25];
+        var labelSteps = [];
+        preferredLabelSteps.forEach(function (label, index) {
+            labelSteps[index] = preferredLabelSteps[index] * order;
+        });
+        for (var i = 0; i < labelSteps.length; i++) {
+            var errorTop = labelSteps[i] - this.maxY % labelSteps[i];
+            var errorBottom = this.minY % labelSteps[i];
+            var error = errorTop + errorBottom;
+
+            var minY = this.minY - errorBottom;
+
+            var maxY = this.maxY + errorTop;
+            this.gridLineCount = ((maxY - minY) / labelSteps[i]) + 1;
+            this.drawingStepSize = this.xAxisHeight / (this.gridLineCount - 1);
+            this.dataStepSize = labelSteps[i];
+            this.calculateLabelHeight();
+
+
+            labelsOverlapping = this.drawingStepSize < this.labelHeight;
+            moreLabelsThanUserWants = this.gridLineCount > this.yAxisMaxLabels;
+
+            if (!moreLabelsThanUserWants && !labelsOverlapping) {
+                foundBestSolution = true;
+                lowestError = error;
+                lowestErrorTop = errorTop;
+                lowestErrorBottom = errorBottom;
+                closestStepping = labelSteps[i];
+                this.minY = minY;
+                this.maxY = maxY;
+                this.calculateDataRanges(null, this.minY, null, this.maxY);
+                break;
             }
         }
     }
-    this.calculateDataRanges(null, this.minY, null, this.maxY);
-
-    this.dataStepSize = closestStepping;
-    this.drawingStepSize = this.xAxisHeight / (this.gridLineCount - 1);
-
-    console.log("closestStepping " + closestStepping)
-    console.log("lowestErrorTop " + lowestErrorTop)
-    console.log("lowestErrorBottom " + lowestErrorBottom)
-    var a = this.minY;
-    console.log("minY " + a)
-    console.log("maxY " + this.maxY)
-
-    console.log("gridlinecount " + this.gridLineCount)
-
-
 };
-var WHOLE_NUMBER_DECIMAL_TOLERANCE = 5;
-function isWholeNumber(number, decimalOffset) {
-    return round(number, decimalOffset + WHOLE_NUMBER_DECIMAL_TOLERANCE) == round(number, decimalOffset);
+
+Plot.prototype.drawAxis = function () {
+    for (var i = 0; i < this.gridLineCount; i += 1) {
+        var y = this.topOffset + this.xAxisHeight - i * this.drawingStepSize;
+
+        var labelValue = this.minPlottingY + this.dataStepSize * i;
+        labelValue = round(labelValue, this.longestLabelY)
+        // labelValue = toFixedDecimals(labelValue, this.longestLabelY)
+        labelValue = fillWithZeros(labelValue, this.longestLabelY - labelValue.toString().length - this.yAxisLabelPrefix.length - this.yAxisLabelSuffix.length);
+        labelValue = this.yAxisLabelPrefix + labelValue + this.yAxisLabelSuffix;
+        var xMargins = this.xAxisWidth / (this.longestLabelY + 10)
+
+        drawTextWithHeight(labelValue, xMargins, y, this.labelHeight, "#fff", this.ctx);
+        drawGridLine("#fff", this.leftOffset, y, this.width, this.ctx)
+    }
+
+    this.ctx.globalCompositeOperation = "destination-over";
+    this.ctx.beginPath();
+    this.ctx.strokeStyle = "#fff";
+    this.ctx.moveTo(this.leftOffset, this.height - this.bottomOffset);
+    this.ctx.lineTo(this.leftOffset, this.topOffset);
+    this.ctx.stroke();
+
+    this.ctx.beginPath();
+    this.ctx.strokeStyle = "#fff";
+    this.ctx.moveTo(this.leftOffset, this.height - this.bottomOffset);
+    this.ctx.lineTo(this.width, this.height - this.bottomOffset);
+    this.ctx.stroke();
+    this.ctx.globalCompositeOperation = "source-over";
 }
 Plot.prototype.draw = function () {
     for (var i = 0; i < this.graphs.length; i++) {
@@ -191,34 +204,6 @@ function scaleAndInvertCoordinates(data, scaling, zeroline, bottomOffset, height
     return scaled;
 }
 
-Plot.prototype.drawAxis = function () {
-    for (var i = 0; i < this.gridLineCount; i += 1) {
-        var y = this.topOffset + this.xAxisHeight - i * this.drawingStepSize;
-
-        var labelValue = this.minPlottingY + this.dataStepSize * i;
-        if (this.yAxisLabelMaxDecimals > 0) var labelValue = round(this.minPlottingY + this.dataStepSize * i, this.yAxisLabelMaxDecimals);
-
-
-
-
-        drawTextWithHeight(labelValue + "°", this.xAxisWidth / 4, y, this.labelHeight, "#fff", this.ctx);
-        drawGridLine("#fff", this.leftOffset, y, this.width, this.ctx)
-    }
-
-    this.ctx.globalCompositeOperation = "destination-over";
-    this.ctx.beginPath();
-    this.ctx.strokeStyle = "#fff";
-    this.ctx.moveTo(this.leftOffset, this.height - this.bottomOffset);
-    this.ctx.lineTo(this.leftOffset, this.topOffset);
-    this.ctx.stroke();
-
-    this.ctx.beginPath();
-    this.ctx.strokeStyle = "#fff";
-    this.ctx.moveTo(this.leftOffset, this.height - this.bottomOffset);
-    this.ctx.lineTo(this.width, this.height - this.bottomOffset);
-    this.ctx.stroke();
-    this.ctx.globalCompositeOperation = "source-over";
-}
 
 function drawTextWithHeight(text, x, y, height, color, ctx) {
     var zoomFactor = height / 20;
@@ -324,4 +309,46 @@ function round(value, decimals) {
     }
     //round
     return Number(Math.round(valueString + 'e' + (power + decimals)) + 'e-' + (decimals));
+}
+function orderOfMagnitude(n) {
+    var order = Math.floor(Math.log(Math.abs(n)) / Math.LN10
+        + 0.000000001); // because float math sucks like that
+    return Math.pow(10, order);
+}
+function orderToDecimalCount(order) {
+    return Math.round(Math.log(order) / Math.log(10))
+}
+function toFixedDecimals(wert, decimals) {
+    var Betrag = wert + "";
+    var Kommaindex = Betrag.toString().indexOf(".");
+
+    var noDecimals = (Kommaindex == -1);
+    if (noDecimals) {
+        if (decimals > 0) Betrag += ".";
+        for (var i = 0; i < decimals; i++) {
+            Betrag += "0";
+        }
+    } else {
+        var currentDecimals = Betrag.toString().length - (Kommaindex + 1);
+        for (var i = 0; i < decimals - currentDecimals; i++) {
+            Betrag += "0";
+        }
+    }
+    return Betrag;
+
+}
+function fillWithZeros(number, amount) {
+    console.log("appending " + amount + " zeros or .")
+    number = number.toString();
+    var Kommaindex = number.indexOf(".");
+
+    var noDecimals = (Kommaindex == -1);
+    if (noDecimals && amount > 1) {
+        number += ".";
+        amount--;
+    }
+    for (var i = 0; i < amount; i++) {
+        number += "0";
+    }
+    return number;
 }
