@@ -33,7 +33,7 @@ var zeroToFour = Math.random() * 0.04;
 var mockupGraph1 = generateMockupData(0, 0, zeroToFour, 48);
 var mockupGraph2 = generateMockupData(1, 0, zeroToFour, 48);
 
-// var mockupData = [25.9, 27, 27, 28, 29, 30, 37.5, 35, 30, 30];
+var mockupData = [25.9, 27, 27, 28, 29, 30, 38, 35, 30, 30];
 // mockupData.forEach(function(value, index){
 //     mockupData[index]*=1;
 // })
@@ -53,7 +53,7 @@ window.onload = function () {
         xAxisLabelSuffix: "",
         xAxisLabelPrefix: "",
         xAxisMaxLabels: 11,
-        yAxisMaxLabels: 5,
+        yAxisMaxLabels: 10,
         graphs: [
             {
                 type: "line",
@@ -64,14 +64,14 @@ window.onload = function () {
                 // x: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
                 // y: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
                 
-                // x: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900],
-                // y: mockupData,
-                // xHighlight: [],
-                // yHighlight: []
-                x: mockupGraph1.x,
-                y: mockupGraph1.y,
-                xHighlight: mockupGraph1.xHighlight,
-                yHighlight: mockupGraph1.yHighlight
+                x: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900],
+                y: mockupData,
+                xHighlight: [],
+                yHighlight: []
+                // x: mockupGraph1.x,
+                // y: mockupGraph1.y,
+                // xHighlight: mockupGraph1.xHighlight,
+                // yHighlight: mockupGraph1.yHighlight
             }
             // ,
             // {

@@ -41,11 +41,13 @@ Plot.prototype.calculateDataRanges = function (minPlottingX, minPlottingY, maxPl
     this.xDataRange = this.maxX - this.minX;
     this.yDataRange = this.maxY - this.minY;
 
+    //orderY is the order of Magnitude in which stepping should occour (initial guess), eg: 0 to 1 => range = 1 => orderY = 0.1
     this.orderY = orderOfMagnitude(this.yDataRange) * 0.1;
     var minimumOrderY = Math.pow(10, -this.yAxisLabelMaxDecimals);
     if (minimumOrderY > this.orderY) this.orderY = minimumOrderY;
     this.decimalsY = -orderToDecimalCount(this.orderY);
 
+    //rounds max up and min down for plotting with nicer numbers, floorToDecimals rounds down at certain decimal
     if (!minPlottingX) this.minPlottingX = floorToDecimals(Math.min.apply(null, allXData), this.xAxisLabelMaxDecimals);
     else this.minPlottingX = minPlottingX;
     if (!minPlottingY) this.minPlottingY = floorToDecimals(Math.min.apply(null, allYData), this.decimalsY);
@@ -82,10 +84,10 @@ Plot.prototype.scaleData = function () {
     }
 }
 Plot.prototype.calculateLabelHeight = function () {
-    longestValue = round(this.minPlottingY + this.dataStepSize, this.yAxisLabelMaxDecimals).toString().length;
+    longestValue = round(this.maxPlottingY + this.dataStepSize, this.yAxisLabelMaxDecimals).toString().length;
     this.longestLabelY = longestValue + this.yAxisLabelPrefix.length + this.yAxisLabelSuffix.length;
-    this.longestLabelX = longestValue + this.xAxisLabelPrefix.length + this.xAxisLabelSuffix.length;
-    this.labelHeight = 1.95 * this.xAxisWidth / (this.longestLabelY)
+    // this.longestLabelX = longestValue + this.xAxisLabelPrefix.length + this.xAxisLabelSuffix.length;
+    this.labelHeight = 1.80 * this.xAxisWidth / (this.longestLabelY);//old: 19,5
 }
 Plot.prototype.calculateDrawingProperties = function () {
     this.xAxisHeight = this.height - this.topOffset - this.bottomOffset;
@@ -149,9 +151,8 @@ Plot.prototype.drawAxis = function () {
         var y = this.topOffset + this.xAxisHeight - i * this.drawingStepSize;
 
         var labelValue = this.minPlottingY + this.dataStepSize * i;
-        labelValue = round(labelValue, this.longestLabelY)
-        // labelValue = toFixedDecimals(labelValue, this.longestLabelY)
-        labelValue = fillWithZeros(labelValue, this.longestLabelY - labelValue.toString().length - this.yAxisLabelPrefix.length - this.yAxisLabelSuffix.length);
+        labelValue = round(labelValue, this.longestLabelY);
+        labelValue = fillWithDecimalZeros(labelValue, this.longestLabelY - labelValue.toString().length - this.yAxisLabelPrefix.length - this.yAxisLabelSuffix.length);
         labelValue = this.yAxisLabelPrefix + labelValue + this.yAxisLabelSuffix;
         var xMargins = this.xAxisWidth / (this.longestLabelY + 10)
 
@@ -187,8 +188,6 @@ Plot.prototype.draw = function () {
     this.drawAxis();
 
 }
-
-
 function scaleCoordinates(data, scaling, zeroline, leftOffset) {
     var scaled = [];
     for (var i = 0; i < data.length; i++) {
@@ -203,14 +202,10 @@ function scaleAndInvertCoordinates(data, scaling, zeroline, bottomOffset, height
     }
     return scaled;
 }
-
-
 function drawTextWithHeight(text, x, y, height, color, ctx) {
     var zoomFactor = height / 20;
     var x = x / zoomFactor;
     var y = y / zoomFactor;// + height/(zoomFactor);
-
-
 
     ctx.save()
     ctx.font = "20px sans serif";
@@ -222,14 +217,13 @@ function drawTextWithHeight(text, x, y, height, color, ctx) {
     ctx.restore()
 }
 function drawGridLine(color, x, y, width, ctx) {
-
     ctx.beginPath();
     ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
     ctx.moveTo(x, y);
     ctx.lineTo(x + width, y);
     ctx.stroke();
 }
-
 function drawDataPoints(xCoordinates, yCoordinates, color, radius, linewidth, fill, ctx) {
 
     for (var i = 0; i < xCoordinates.length; i++) {
@@ -263,7 +257,6 @@ var drawDataPoint = function (x, y, color, radius, linewidth, fill, ctx) {
 }
 
 var drawLineInterpolation = function (xCoordinates, yCoordinates, color, linewidth, ctx) {
-
     ctx.lineWidth = linewidth;
     ctx.strokeStyle = color;
     for (var i = 0; i < xCoordinates.length; i++) {
@@ -272,9 +265,19 @@ var drawLineInterpolation = function (xCoordinates, yCoordinates, color, linewid
         ctx.lineTo(xCoordinates[i + 1], yCoordinates[i + 1]);
         ctx.stroke();
     }
+    ctx.fillStyle = color;
+    ctx.linewidth = 1;
+    var radius = Math.ceil(linewidth / 2) -1;
+    console.log("radius: " + radius);
+    console.log("linewidth " + linewidth);
+
+    for (var i = 0; i < xCoordinates.length; i++) {
+        ctx.beginPath();
+        ctx.arc(xCoordinates[i], yCoordinates[i], radius, 0, Math.PI * 2, true);
+        ctx.fill();
+    }
 }
 var drawShadowInterpolation = function (xCoordinates, yCoordinates, color, bottom, ctx) {
-
     ctx.globalCompositeOperation = "destination-over";
     ctx.lineWidth = 1;
     ctx.strokeStyle = color;
@@ -292,9 +295,7 @@ var drawShadowInterpolation = function (xCoordinates, yCoordinates, color, botto
     ctx.globalCompositeOperation = "source-over";
 }
 
-
 function round(value, decimals) {
-
     //Removing scientific notation if used:
     var valueString = value.toString();
     var indexOfE = valueString.indexOf("E");
@@ -337,8 +338,8 @@ function toFixedDecimals(wert, decimals) {
     return Betrag;
 
 }
-function fillWithZeros(number, amount) {
-    console.log("appending " + amount + " zeros or .")
+function fillWithDecimalZeros(number, amount) {
+    console.log("appending " + amount + " zeros")
     number = number.toString();
     var Kommaindex = number.indexOf(".");
 
@@ -346,6 +347,9 @@ function fillWithZeros(number, amount) {
     if (noDecimals && amount > 1) {
         number += ".";
         amount--;
+    }
+    if (noDecimals && amount == 1) {
+        return number;
     }
     for (var i = 0; i < amount; i++) {
         number += "0";
