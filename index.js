@@ -157,22 +157,10 @@ Plot.prototype.drawAxis = function () {
         var xMargins = this.xAxisWidth / (this.longestLabelY + 10)
 
         drawTextWithHeight(labelValue, xMargins, y, this.labelHeight, "#fff", this.ctx);
-        drawGridLine("#fff", this.leftOffset, y, this.width, this.ctx)
+        drawGridLineX("#fff", this.leftOffset, y, this.width, this.ctx)
     }
 
-    this.ctx.globalCompositeOperation = "destination-over";
-    this.ctx.beginPath();
-    this.ctx.strokeStyle = "#fff";
-    this.ctx.moveTo(this.leftOffset, this.height - this.bottomOffset);
-    this.ctx.lineTo(this.leftOffset, this.topOffset);
-    this.ctx.stroke();
-
-    this.ctx.beginPath();
-    this.ctx.strokeStyle = "#fff";
-    this.ctx.moveTo(this.leftOffset, this.height - this.bottomOffset);
-    this.ctx.lineTo(this.width, this.height - this.bottomOffset);
-    this.ctx.stroke();
-    this.ctx.globalCompositeOperation = "source-over";
+    drawGridLineY("#fff", this.leftOffset, this.height - this.bottomOffset, this.height - this.topOffset - this.bottomOffset, this.ctx)
 }
 Plot.prototype.draw = function () {
     for (var i = 0; i < this.graphs.length; i++) {
@@ -216,12 +204,20 @@ function drawTextWithHeight(text, x, y, height, color, ctx) {
     ctx.fillText(text, x, y);
     ctx.restore()
 }
-function drawGridLine(color, x, y, width, ctx) {
+function drawGridLineX(color, x, y, width, ctx) {
     ctx.beginPath();
     ctx.strokeStyle = color;
     ctx.lineWidth = 1;
     ctx.moveTo(x, y);
     ctx.lineTo(x + width, y);
+    ctx.stroke();
+}
+function drawGridLineY(color, x, y, height, ctx) {
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
+    ctx.moveTo(x, y);
+    ctx.lineTo(x, y - height);
     ctx.stroke();
 }
 function drawDataPoints(xCoordinates, yCoordinates, color, radius, linewidth, fill, ctx) {
@@ -267,7 +263,7 @@ var drawLineInterpolation = function (xCoordinates, yCoordinates, color, linewid
     }
     ctx.fillStyle = color;
     ctx.linewidth = 1;
-    var radius = Math.ceil(linewidth / 2) -1;
+    var radius = Math.ceil(linewidth / 2) - 1;
     console.log("radius: " + radius);
     console.log("linewidth " + linewidth);
 
