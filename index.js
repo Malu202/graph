@@ -15,8 +15,11 @@ function Plot(canvas, config) {
     this.xAxisLabelSuffix = config.xAxisLabelSuffix;
     this.xAxisLabelPrefix = config.xAxisLabelPrefix;
 
-    this.preferredLabelStepsX = [1, 2, 5, 10, 20, 25];
-    this.preferredLabelStepsY = [1, 2, 5, 10, 20, 25];
+    // this.preferredLabelStepsX = [1, 2, 5, 10, 20, 25];
+    // this.preferredLabelStepsY = [1, 2, 5, 10, 20, 25];
+
+    this.preferredLabelStepsX = [1, 2, 2.5, 5];
+    this.preferredLabelStepsY = [1, 2, 2.5, 5];
 
 
     this.canvas = canvas;
@@ -60,13 +63,13 @@ Plot.prototype.calculateDataRanges = function (minPlottingX, minPlottingY, maxPl
     this.decimalsY = -orderToDecimalCount(this.orderY);
 
     //rounds max up and min down for plotting with nicer numbers, floorToDecimals rounds down at certain decimal
-    if (!minPlottingX) this.minPlottingX = floorToDecimals(Math.min.apply(null, allXData), this.decimalsX);
+    if (minPlottingX == null) this.minPlottingX = floorToDecimals(Math.min.apply(null, allXData), this.decimalsX);
     else this.minPlottingX = minPlottingX;
-    if (!minPlottingY) this.minPlottingY = floorToDecimals(Math.min.apply(null, allYData), this.decimalsY);
+    if (minPlottingY == null) this.minPlottingY = floorToDecimals(Math.min.apply(null, allYData), this.decimalsY);
     else this.minPlottingY = minPlottingY;
-    if (!maxPlottingX) this.maxPlottingX = ceilToDecimals(Math.max.apply(null, allXData), this.decimalsX);
+    if (maxPlottingX == null) this.maxPlottingX = ceilToDecimals(Math.max.apply(null, allXData), this.decimalsX);
     else this.maxPlottingX = maxPlottingX;
-    if (!maxPlottingY) this.maxPlottingY = ceilToDecimals(Math.max.apply(null, allYData), this.decimalsY);
+    if (maxPlottingY == null) this.maxPlottingY = ceilToDecimals(Math.max.apply(null, allYData), this.decimalsY);
     else this.maxPlottingY = maxPlottingY;
 
     this.xPlottingRange = this.maxPlottingX - this.minPlottingX;
@@ -123,22 +126,29 @@ Plot.prototype.calculateDrawingPropertiesY = function () {
         var errorTop = labelSteps[i] - this.maxY % labelSteps[i];
         if (errorTop == labelSteps[i]) errorTop = 0;
         var errorBottom = this.minY % labelSteps[i];
-
+        
         var minY = this.minY - errorBottom;
         var maxY = this.maxY + errorTop;
-
+        
         this.gridLineCountY = ((maxY - minY) / labelSteps[i]) + 1;
         this.drawingStepSizeY = this.yAxisHeight / (this.gridLineCountY - 1);
         this.dataStepSizeY = labelSteps[i];
         this.calculateLabelHeight();
-
+        
 
         var labelsOverlappingY = this.drawingStepSizeY < this.labelHeight;
         var moreLabelsThanUserWantsY = this.gridLineCountY > this.yAxisMaxLabels;
-
+        
         if (!moreLabelsThanUserWantsY && !labelsOverlappingY) {
             this.calculateDataRanges(null, minY, null, maxY);
             break;
+        } else {
+            if (i == (labelSteps.length - 1)) {
+                this.preferredLabelStepsY.forEach(function (label, index) {
+                    labelSteps[index] *= 10;
+                });
+                i = -1;
+            }
         }
     }
 }
@@ -327,8 +337,6 @@ var drawLineInterpolation = function (xCoordinates, yCoordinates, color, linewid
     ctx.fillStyle = color;
     ctx.linewidth = 1;
     var radius = Math.ceil(linewidth / 2) - 1;
-    console.log("radius: " + radius);
-    console.log("linewidth " + linewidth);
 
     for (var i = 0; i < xCoordinates.length; i++) {
         ctx.beginPath();
@@ -400,7 +408,7 @@ function toFixedDecimals(wert, decimals) {
 
 }
 function fillWithDecimalZeros(number, amount) {
-    console.log("appending " + amount + " zeros")
+    // console.log("appending " + amount + " zeros")
     number = number.toString();
     var Kommaindex = number.indexOf(".");
 
