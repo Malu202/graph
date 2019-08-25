@@ -14,9 +14,8 @@ function Plot(canvas, config) {
     this.yAxisLabelPrefix = config.yAxisLabelPrefix;
     this.xAxisLabelSuffix = config.xAxisLabelSuffix;
     this.xAxisLabelPrefix = config.xAxisLabelPrefix;
-
-    // this.preferredLabelStepsX = [1, 2, 5, 10, 20, 25];
-    // this.preferredLabelStepsY = [1, 2, 5, 10, 20, 25];
+    this.drawGridLineX = config.drawGridLineX;
+    this.drawGridLineY = config.drawGridLineY;
 
     this.preferredLabelStepsX = [1, 2, 2.5, 5];
     this.preferredLabelStepsY = [1, 2, 2.5, 5];
@@ -101,13 +100,13 @@ Plot.prototype.scaleData = function () {
 }
 Plot.prototype.calculateLabelHeight = function () {
     var longestValue = round(this.maxPlottingY + this.dataStepSizeY, this.yAxisLabelMaxDecimals);
-    if (isNaN(longestValue)) console.error("To many decimals, or numbers to long, cannot round, try reducing MaxDecimals");
+    if (isNaN(longestValue) && (!isNaN(this.maxPlottingY + this.dataStepSizeY))) console.error("To many decimals, or numbers to long, cannot round, try reducing MaxDecimals");
     var longestValueLength = longestValue.toString().length;
     this.longestLabelY = longestValueLength + this.yAxisLabelPrefix.length + this.yAxisLabelSuffix.length;
     this.labelHeight = 1.80 * this.yAxisWidth / (this.longestLabelY);//old: 19,5
 }
 Plot.prototype.calculateDrawingProperties = function () {
-    // this.calculateDrawingPropertiesX();
+    this.calculateDrawingPropertiesX();
     this.calculateDrawingPropertiesY();
 };
 Plot.prototype.calculateDrawingPropertiesY = function () {
@@ -115,7 +114,7 @@ Plot.prototype.calculateDrawingPropertiesY = function () {
     this.yAxisWidth = this.leftOffset;
 
     var orderY = this.orderY;
-    var longestValueY = round(this.minPlottingY + this.dataStepSizeY, this.yAxisLabelMaxDecimals).toString().length
+    var longestValueY = round(this.maxPlottingY + this.dataStepSizeY, this.yAxisLabelMaxDecimals).toString().length
     this.longestLabelY = longestValueY + this.yAxisLabelPrefix.length + this.yAxisLabelSuffix.length;
 
     var labelSteps = this.preferredLabelStepsY;
@@ -126,19 +125,19 @@ Plot.prototype.calculateDrawingPropertiesY = function () {
         var errorTop = labelSteps[i] - this.maxY % labelSteps[i];
         if (errorTop == labelSteps[i]) errorTop = 0;
         var errorBottom = this.minY % labelSteps[i];
-        
+
         var minY = this.minY - errorBottom;
         var maxY = this.maxY + errorTop;
-        
+
         this.gridLineCountY = ((maxY - minY) / labelSteps[i]) + 1;
         this.drawingStepSizeY = this.yAxisHeight / (this.gridLineCountY - 1);
         this.dataStepSizeY = labelSteps[i];
         this.calculateLabelHeight();
-        
+
 
         var labelsOverlappingY = this.drawingStepSizeY < this.labelHeight;
         var moreLabelsThanUserWantsY = this.gridLineCountY > this.yAxisMaxLabels;
-        
+
         if (!moreLabelsThanUserWantsY && !labelsOverlappingY) {
             this.calculateDataRanges(null, minY, null, maxY);
             break;
@@ -157,51 +156,39 @@ Plot.prototype.calculateDrawingPropertiesX = function () {
     this.xAxisWidth = this.width - this.leftOffset;
 
     var orderX = this.orderX;
-    this.gridLineCountX = this.xPlottingRange / orderX + 1;
-    this.gridLineCountX = round(this.gridLineCountX, 0)
-    this.dataStepSizeX = this.xPlottingRange / (this.gridLineCountX - 1);
-    this.drawingStepSizeX = this.xAxisWidth / (this.gridLineCountX - 1);
-    var longestValueX = round(this.minPlottingX + this.dataStepSizeX, this.xAxisLabelMaxDecimals).toString().length;
+    var longestValueX = round(this.maxPlottingX + this.dataStepSizeX, this.xAxisLabelMaxDecimals).toString().length
     this.longestLabelX = longestValueX + this.xAxisLabelPrefix.length + this.xAxisLabelSuffix.length;
 
+    var labelSteps = this.preferredLabelStepsX;
+    this.preferredLabelStepsX.forEach(function (label, index) {
+        labelSteps[index] *= orderX;
+    });
+    for (var i = 0; i < labelSteps.length; i++) {
+        var errorTop = labelSteps[i] - this.maxX % labelSteps[i];
+        if (errorTop == labelSteps[i]) errorTop = 0;
+        var errorBottom = this.minX % labelSteps[i];
 
-    this.calculateLabelHeight();
-    var labelsOverlappingX = this.drawingStepSizeX < this.labelHeight;
-    var moreLabelsThanUserWantsX = this.gridLineCountX > this.xAxisMaxLabels;
-    if (labelsOverlappingX || moreLabelsThanUserWantsX) {
+        var minX = this.minX - errorBottom;
+        var maxX = this.maxX + errorTop;
 
-        var labelSteps = this.preferredLabelStepsX;
-
-        this.preferredLabelStepsX.forEach(function (label, index) {
-            labelSteps[index] *= orderX;
-        });
-        for (var i = 0; i < labelSteps.length; i++) {
-            var errorTop = labelSteps[i] - this.maxX % labelSteps[i];
-            var errorBottom = this.minX % labelSteps[i];
-            var error = errorTop + errorBottom;
-
-            var minX = this.minX - errorBottom;
-
-            var maxX = this.maxX + errorTop;
-            this.gridLineCountX = ((maxX - minX) / labelSteps[i]) + 1;
-            this.drawingStepSizeX = this.xAxisHeight / (this.gridLineCountX - 1);
-            this.dataStepSizeX = labelSteps[i];
-            this.calculateLabelHeight();
+        this.gridLineCountX = ((maxX - minX) / labelSteps[i]) + 1;
+        this.drawingStepSizeX = this.xAxisWidth / (this.gridLineCountX - 1);
+        this.dataStepSizeX = labelSteps[i];
+        this.calculateLabelHeight();
 
 
-            labelsOverlappingX = this.drawingStepSizeX < this.labelHeight;
-            moreLabelsThanUserWantsX = this.gridLineCountX > this.xAxisMaxLabels;
+        var labelsOverlappingX = this.drawingStepSizeX < this.labelHeight;
+        var moreLabelsThanUserWantsX = this.gridLineCountX > this.xAxisMaxLabels;
 
-            if (!moreLabelsThanUserWantsX && !labelsOverlappingX) {
-                foundBestSolution = true;
-                lowestError = error;
-                lowestErrorTop = errorTop;
-                lowestErrorBottom = errorBottom;
-                closestStepping = labelSteps[i];
-                this.minX = minX;
-                this.maxX = maxX;
-                this.calculateDataRanges(null, this.minX, null, this.maxX);
-                break;
+        if (!moreLabelsThanUserWantsX && !labelsOverlappingX) {
+            this.calculateDataRanges(null, minX, null, maxX);
+            break;
+        } else {
+            if (i == (labelSteps.length - 1)) {
+                this.preferredLabelStepsX.forEach(function (label, index) {
+                    labelSteps[index] *= 10;
+                });
+                i = -1;
             }
         }
     }
@@ -218,9 +205,10 @@ Plot.prototype.drawAxis = function () {
         var xMargins = this.yAxisWidth / (this.longestLabelY + 10)
 
         drawTextWithHeight(labelValue, xMargins, y, this.labelHeight, "#fff", this.ctx);
-        drawGridLineX("#fff", this.leftOffset, y, this.width, this.ctx)
+        if (this.drawGridLineX) drawGridLineX("#fff", this.leftOffset, y, this.width, this.ctx)
     }
-
+    //x-Axis
+    drawGridLineX("#fff", this.leftOffset, this.height - this.bottomOffset, this.width, this.ctx)
     for (var i = 0; i < this.gridLineCountX; i += 1) {
         var x = this.leftOffset + i * this.drawingStepSizeX;
 
@@ -230,9 +218,11 @@ Plot.prototype.drawAxis = function () {
         labelValue = this.xAxisLabelPrefix + labelValue + this.xAxisLabelSuffix;
         var yMargins = this.xAxisHeight / (4);
 
-        drawTextWithHeight(labelValue, x - (labelValue.length * this.labelHeight) / 2, this.height - this.bottomOffset + yMargins, this.labelHeight, "#fff", this.ctx);
-        // drawGridLineX("#fff", x, this.height - this.bottomOffset, this.height - this.topOffset - this.bottomOffset, this.ctx)
+
+        drawTextWithHeight(labelValue, x - (labelValue.length * this.labelHeight) / 4, this.height - this.bottomOffset + yMargins, this.labelHeight, "#fff", this.ctx);
+        if (this.drawGridLineY) drawGridLineY("#fff", x, this.height - this.bottomOffset, this.height - this.topOffset - this.bottomOffset, this.ctx)
     }
+    //y-Axis
     drawGridLineY("#fff", this.leftOffset, this.height - this.bottomOffset, this.height - this.topOffset - this.bottomOffset, this.ctx)
 }
 Plot.prototype.draw = function () {
@@ -413,12 +403,13 @@ function fillWithDecimalZeros(number, amount) {
     var Kommaindex = number.indexOf(".");
 
     var noDecimals = (Kommaindex == -1);
+    if (noDecimals && amount == 1) {
+        return number;
+    }
     if (noDecimals && amount > 1) {
         number += ".";
         amount--;
-    }
-    if (noDecimals && amount == 1) {
-        return number;
+        console.log("amount", amount)
     }
     for (var i = 0; i < amount; i++) {
         number += "0";

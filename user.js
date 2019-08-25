@@ -69,6 +69,8 @@ window.onload = function () {
         xAxisLabelPrefix: "",
         xAxisMaxLabels: 11,
         yAxisMaxLabels: 10,
+        drawGridLineX: true,
+        drawGridLineY: true,
         graphs: [
             {
                 type: "line",
