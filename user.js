@@ -58,9 +58,10 @@ window.onload = function () {
 
     plot = new Plot(can, {
         backgroundColor: PRIMARY,
+        xAxisSize: 0.1,
+        yAxisSize: 0.1,
         topMargin: 0.1,
-        bottomMargin: 0.1,
-        axisSize: 0.05,
+        rightMargin: 0.1,
         xAxisLabelMaxDecimals: 0,
         yAxisLabelMaxDecimals: 5,
         yAxisLabelSuffix: "°",
@@ -68,7 +69,7 @@ window.onload = function () {
         xAxisLabelSuffix: "",
         xAxisLabelPrefix: "",
         xAxisMaxLabels: 11,
-        yAxisMaxLabels: 10,
+        yAxisMaxLabels: 14,
         drawGridLineX: true,
         drawGridLineY: true,
         graphs: [
