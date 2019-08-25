@@ -47,7 +47,7 @@ for (var i = 0; i < 48; i++) {
 }
 
 mockupDataX.forEach(function (value, index) {
-    mockupDataX[index] *= 100;
+    mockupDataX[index] *= 10000;
 })
 mockupDataY.forEach(function (value, index) {
     mockupDataY[index] *= 1;
@@ -58,12 +58,12 @@ window.onload = function () {
 
     plot = new Plot(can, {
         backgroundColor: PRIMARY,
-        xAxisSize: 0.1,
-        yAxisSize: 0.1,
-        topMargin: 0.1,
-        rightMargin: 0.1,
+        xAxisSize: 0.05,
+        yAxisSize: 0.05,
+        topMargin: 0.05,
+        rightMargin: 0.05,
         xAxisLabelMaxDecimals: 0,
-        yAxisLabelMaxDecimals: 5,
+        yAxisLabelMaxDecimals: 0,
         yAxisLabelSuffix: "°",
         yAxisLabelPrefix: "",
         xAxisLabelSuffix: "",
