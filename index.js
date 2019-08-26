@@ -1,26 +1,11 @@
 function Plot(canvas, config) {
-    this.backgroundColor = config.backgroundColor;
-    this.xAxisSize = config.xAxisSize;
-    this.yAxisSize = config.yAxisSize;
-    this.xAxisLabelMaxDecimals = config.xAxisLabelMaxDecimals;
-    this.yAxisLabelMaxDecimals = config.yAxisLabelMaxDecimals;
-    this.xAxisMaxLabels = config.xAxisMaxLabels;
-    this.yAxisMaxLabels = config.yAxisMaxLabels;
-    this.yAxisLabelSuffix = config.yAxisLabelSuffix;
-    this.yAxisLabelPrefix = config.yAxisLabelPrefix;
-    this.xAxisLabelSuffix = config.xAxisLabelSuffix;
-    this.xAxisLabelPrefix = config.xAxisLabelPrefix;
-    this.drawGridLineX = config.drawGridLineX;
-    this.drawGridLineY = config.drawGridLineY;
-    this.topMargin = config.topMargin;
-    this.rightMargin = config.rightMargin;
-    this.xLabelNames = config.xLabelNames;
+
+    for (var k in config) {
+        this[k] = config[k];
+    }
+    this.applyDefaultSettings();
 
     this.bottomMargin = 0;
-
-    this.preferredLabelStepsX = [1, 2, 2.5, 5];
-    this.preferredLabelStepsY = [1, 2, 2.5, 5];
-
 
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
@@ -28,13 +13,72 @@ function Plot(canvas, config) {
     this.height = canvas.height;
     this.width = canvas.width;
 
-    canvas.style["background-color"] = config.backgroundColor;
+    canvas.style["background-color"] = this.backgroundColor;
 
-    this.graphs = config.graphs;
+    // this.graphs = config.graphs;
     this.calculateDataRanges();
     this.calculateDrawingRanges();
     this.calculateDrawingProperties();
     this.scaleData();
+}
+Plot.prototype.applyDefaultSettings = function () {
+    var defaultPlotSettings = {
+        backgroundColor: "#4caf50",
+        xAxisSize: 0.05,
+        yAxisSize: 0.05,
+        topMargin: 0.05,
+        rightMargin: 0.05,
+        xAxisLabelMaxDecimals: 2,
+        yAxisLabelMaxDecimals: 2,
+        yAxisLabelSuffix: "",
+        yAxisLabelPrefix: "",
+        xAxisLabelSuffix: "",
+        xAxisLabelPrefix: "",
+        xAxisMaxLabels: 11,
+        yAxisMaxLabels: 15,
+        drawGridLineX: true,
+        drawGridLineY: true,
+        preferredLabelStepsX : [1, 2, 2.5, 5],
+        preferredLabelStepsY : [1, 2, 2.5, 5],
+    };
+
+    var defaultGraphSettings = {
+        type: "line",
+        color: WHITE,
+        linewidth: 5,
+        dataPointRadius: 4,
+        dataPointLinewidth: 2
+    }
+    var defaultShadowGraphSettings = {
+        color: WHITE,
+        shadowColor: LIGHT_PRIMARY,
+        linewidth: 4,
+        dataPointRadius: 1.5,
+    }
+
+    for (var j in defaultPlotSettings) {
+        if (this[j] == undefined) {
+            console.log("replaced ", j, ":", this[j], " with ", j, ":", defaultPlotSettings[j])
+            this[j] = defaultPlotSettings[j];
+        }
+    }
+
+    var graphCount = this.graphs.length;
+    for (var i = 0; i < graphCount; i++) {
+        if (this.graphs[i].type == "shadow") {
+            for (var l in defaultShadowGraphSettings) {
+                if (this.graphs[i][l] == undefined) {
+                    this.graphs[i][l] = defaultShadowGraphSettings[l];
+                }
+            }
+        } else {
+            for (var l in defaultGraphSettings) {
+                if (this.graphs[i][l] == undefined) {
+                    this.graphs[i][l] = defaultGraphSettings[l];
+                }
+            }
+        }
+    }
 }
 Plot.prototype.calculateDataRanges = function () {
     this.allXData = [];

@@ -62,7 +62,7 @@ window.onload = function () {
         yAxisSize: 0.05,
         topMargin: 0.05,
         rightMargin: 0.05,
-        xAxisLabelMaxDecimals: 0,
+        xAxisLabelMaxDecimals: 1,
         yAxisLabelMaxDecimals: 0,
         yAxisLabelSuffix: "°",
         yAxisLabelPrefix: "",
@@ -72,7 +72,9 @@ window.onload = function () {
         yAxisMaxLabels: 15,
         drawGridLineX: true,
         drawGridLineY: true,
-        xLabelNames: ["null", "eins", "zwei", "drei", "view", "fünf", "sechs", "sieben", "acht", "neun"],
+        preferredLabelStepsX: [1, 2, 2.5, 5],
+        preferredLabelStepsY: [1, 2, 2.5, 5],
+        xLabelNames: ["null", "eins", "zwei", "drei", "vier", "fünf", "sechs", "sieben", "acht", "neun"],
         // xLabelNames: ["null", "eins", "zwei", "drei"],
 
         graphs: [
@@ -82,14 +84,10 @@ window.onload = function () {
                 linewidth: 5,
                 dataPointRadius: 4,
                 dataPointLinewidth: 2,
-                // x: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-                // y: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-
                 x: mockupDataX,
                 y: mockupDataY,
                 xHighlight: [],
                 yHighlight: [],
-
                 // x: mockupGraph1.x,
                 // y: mockupGraph1.y,
                 // xHighlight: mockupGraph1.xHighlight,
