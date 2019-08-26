@@ -47,7 +47,7 @@ for (var i = 0; i < 48; i++) {
 }
 
 mockupDataX.forEach(function (value, index) {
-    mockupDataX[index] *= 10000;
+    mockupDataX[index] *= 1;
 })
 mockupDataY.forEach(function (value, index) {
     mockupDataY[index] *= 1;
@@ -66,12 +66,13 @@ window.onload = function () {
         yAxisLabelMaxDecimals: 0,
         yAxisLabelSuffix: "°",
         yAxisLabelPrefix: "",
-        xAxisLabelSuffix: "",
+        xAxisLabelSuffix: "h",
         xAxisLabelPrefix: "",
         xAxisMaxLabels: 11,
-        yAxisMaxLabels: 14,
+        yAxisMaxLabels: 15,
         drawGridLineX: true,
         drawGridLineY: true,
+        // xLabelNames: ["null", "eins", "zwei", "drei", "view", "fünf", "sechs", "sieben", "acht", "neun"],
         graphs: [
             {
                 type: "line",
@@ -85,12 +86,13 @@ window.onload = function () {
                 x: mockupDataX,
                 y: mockupDataY,
                 xHighlight: [],
-                yHighlight: []
+                yHighlight: [],
 
                 // x: mockupGraph1.x,
                 // y: mockupGraph1.y,
                 // xHighlight: mockupGraph1.xHighlight,
                 // yHighlight: mockupGraph1.yHighlight
+
             }
             // ,
             // {
