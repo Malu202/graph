@@ -115,8 +115,11 @@ Plot.prototype.calculateDrawingProperties = function () {
     this.calculateDrawingPropertiesX();
     this.calculateDrawingPropertiesY();
 
-    if (false && this.xLabelNames) {
+    if (this.xLabelNames) {
         console.log("custom labels")
+        this.gridLineCountX = this.xLabelNames.length;
+        this.drawingStepSizeX = this.xAxisWidth / (this.gridLineCountX - 1);;
+        this.dataStepSizeX = this.xDataRange / (this.gridLineCountX - 1);
         this.calculateDrawingRanges(null, null, null, null);
     } else {
         this.calculateStepSizeX();
@@ -129,7 +132,6 @@ Plot.prototype.calculateDrawingPropertiesX = function () {
     this.xAxisHeight = this.bottomOffset;
     this.xAxisWidth = this.width - this.leftOffset - this.rightOffset;
 
-    var orderX = this.orderX;
     //var longestValueX = round(this.maxPlottingX + this.dataStepSizeX, this.xAxisLabelMaxDecimals).toString().length
     var longestValueX = round(this.maxPlottingX, this.xAxisLabelMaxDecimals).toString().length
 
@@ -143,13 +145,12 @@ Plot.prototype.calculateDrawingPropertiesY = function () {
     this.yAxisHeight = this.height - this.topOffset - this.bottomOffset;
     this.yAxisWidth = this.leftOffset;
 
-    var orderY = this.orderY;
     var longestValueY = round(this.maxPlottingY + this.dataStepSizeY, this.yAxisLabelMaxDecimals).toString().length
     this.longestLabelY = longestValueY + this.yAxisLabelPrefix.length + this.yAxisLabelSuffix.length;
 }
 
 Plot.prototype.calculateStepSizeX = function () {
-    
+
     var labelSteps = this.preferredLabelStepsX;
     var orderX = this.orderX;
     this.preferredLabelStepsX.forEach(function (label, index) {
@@ -160,12 +161,12 @@ Plot.prototype.calculateStepSizeX = function () {
         var errorTop = labelSteps[i] - this.maxX % labelSteps[i];
         if (errorTop == labelSteps[i]) errorTop = 0;
         var errorBottom = this.minX % labelSteps[i];
-        
+
         var minX = this.minX - errorBottom;
         var maxX = this.maxX + errorTop;
 
         console.log(minX, this.minY, maxX, this.maxY)
-        
+
         this.gridLineCountX = ((maxX - minX) / labelSteps[i]) + 1;
         this.drawingStepSizeX = this.xAxisWidth / (this.gridLineCountX - 1);
         this.dataStepSizeX = labelSteps[i];
@@ -252,11 +253,16 @@ Plot.prototype.drawAxis = function () {
     for (var i = 0; i < this.gridLineCountX; i += 1) {
         var x = this.leftOffset + i * this.drawingStepSizeX;
 
-        var labelValue = this.minPlottingX + this.dataStepSizeX * i;
-        labelValue = round(labelValue, this.longestLabelX);
-        var fillAbleDigitCount = this.longestLabelX - labelValue.toString().length - this.xAxisLabelPrefix.length - this.xAxisLabelSuffix.length;
-        if (fillAbleDigitCount > this.xAxisLabelMaxDecimals) fillAbleDigitCount = this.xAxisLabelMaxDecimals;
-        labelValue = fillWithDecimalZeros(labelValue, fillAbleDigitCount);
+        var labelValue;
+        if (this.xLabelNames) {
+            labelValue = this.xLabelNames[i];
+        } else {
+            labelValue = this.minPlottingX + this.dataStepSizeX * i;
+            labelValue = round(labelValue, this.longestLabelX);
+            var fillAbleDigitCount = this.longestLabelX - labelValue.toString().length - this.xAxisLabelPrefix.length - this.xAxisLabelSuffix.length;
+            if (fillAbleDigitCount > this.xAxisLabelMaxDecimals) fillAbleDigitCount = this.xAxisLabelMaxDecimals;
+            labelValue = fillWithDecimalZeros(labelValue, fillAbleDigitCount);
+        }
         labelValue = this.xAxisLabelPrefix + labelValue + this.xAxisLabelSuffix;
         var yMargins = this.xAxisHeight / (2);
 

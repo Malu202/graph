@@ -66,13 +66,15 @@ window.onload = function () {
         yAxisLabelMaxDecimals: 0,
         yAxisLabelSuffix: "°",
         yAxisLabelPrefix: "",
-        xAxisLabelSuffix: "h",
+        xAxisLabelSuffix: "",
         xAxisLabelPrefix: "",
         xAxisMaxLabels: 11,
         yAxisMaxLabels: 15,
         drawGridLineX: true,
         drawGridLineY: true,
-        // xLabelNames: ["null", "eins", "zwei", "drei", "view", "fünf", "sechs", "sieben", "acht", "neun"],
+        xLabelNames: ["null", "eins", "zwei", "drei", "view", "fünf", "sechs", "sieben", "acht", "neun"],
+        // xLabelNames: ["null", "eins", "zwei", "drei"],
+
         graphs: [
             {
                 type: "line",
