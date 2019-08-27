@@ -63,7 +63,7 @@ window.onload = function () {
         topMargin: 0.05,
         rightMargin: 0.05,
         xAxisLabelMaxDecimals: 1,
-        yAxisLabelMaxDecimals: 0,
+        yAxisLabelMaxDecimals: 3,
         yAxisLabelSuffix: "°",
         yAxisLabelPrefix: "",
         xAxisLabelSuffix: "",
@@ -75,6 +75,7 @@ window.onload = function () {
         preferredLabelStepsX: [1, 2, 2.5, 5],
         preferredLabelStepsY: [1, 2, 2.5, 5],
         xLabelNames: ["null", "eins", "zwei", "drei", "vier", "fünf", "sechs", "sieben", "acht", "neun"],
+        equalLabelSize: true,
         // xLabelNames: ["null", "eins", "zwei", "drei"],
 
         graphs: [
@@ -84,10 +85,11 @@ window.onload = function () {
                 linewidth: 5,
                 dataPointRadius: 4,
                 dataPointLinewidth: 2,
-                x: mockupDataX,
-                y: mockupDataY,
-                xHighlight: [],
-                yHighlight: [],
+                // x: mockupDataX,
+                // y: mockupDataY,
+                x: buggyMockupDataX,
+                y: buggyMockupDataY,
+
                 // x: mockupGraph1.x,
                 // y: mockupGraph1.y,
                 // xHighlight: mockupGraph1.xHighlight,
@@ -115,3 +117,8 @@ window.onload = function () {
 
     plot.draw();
 };
+
+
+var gaugeCanvas = document.getElementById("gauge");
+
+var gauge = new Gauge(gaugeCanvas, 25, "25°", 5, 40, "#fff", "#000");

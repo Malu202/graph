@@ -38,8 +38,9 @@ Plot.prototype.applyDefaultSettings = function () {
         yAxisMaxLabels: 15,
         drawGridLineX: true,
         drawGridLineY: true,
-        preferredLabelStepsX : [1, 2, 2.5, 5],
-        preferredLabelStepsY : [1, 2, 2.5, 5],
+        preferredLabelStepsX: [1, 2, 2.5, 5],
+        preferredLabelStepsY: [1, 2, 2.5, 5],
+        equalLabelSize: true,
     };
 
     var defaultGraphSettings = {
@@ -47,13 +48,17 @@ Plot.prototype.applyDefaultSettings = function () {
         color: WHITE,
         linewidth: 5,
         dataPointRadius: 4,
-        dataPointLinewidth: 2
+        dataPointLinewidth: 2,
+        xHighlight: [],
+        yHighlight: [],
     }
     var defaultShadowGraphSettings = {
         color: WHITE,
         shadowColor: LIGHT_PRIMARY,
         linewidth: 4,
         dataPointRadius: 1.5,
+        xHighlight: [],
+        yHighlight: [],
     }
 
     for (var j in defaultPlotSettings) {
@@ -310,6 +315,7 @@ Plot.prototype.drawAxis = function () {
         labelValue = this.xAxisLabelPrefix + labelValue + this.xAxisLabelSuffix;
         var yMargins = this.xAxisHeight / (2);
 
+        if(this.equalLabelSize && this.labelHeightX > this.labelHeightY) this.labelHeightX = this.labelHeightY;
         drawTextWithHeight(labelValue, x - (labelValue.length * this.labelHeightX) / 4, this.height - this.bottomOffset + yMargins, this.labelHeightX, "#fff", this.ctx);
         if (this.drawGridLineY) drawGridLineY("#fff", x, this.height - this.bottomOffset, this.height - this.topOffset - this.bottomOffset, this.ctx)
     }
