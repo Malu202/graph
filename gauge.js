@@ -9,7 +9,7 @@ function Gauge(canvas, value, displayValue, min, max, background, textColor) {
     canvas.style["background-color"] = background;
     this.textColor = textColor;
 
-    this.changeValue(value, displayValue)
+    // this.changeValue(value, displayValue)
 }
 
 Gauge.prototype.changeValue = function (value, displayValue) {
@@ -37,8 +37,31 @@ Gauge.prototype.changeValue = function (value, displayValue) {
     this.ctx.stroke();
 }
 
-function animateVaue(){
+Gauge.prototype.animateValue = function (value, displayValue, animationTime) {
 
+    this.currentValue = this.min;
+    this.value = value;
+    this.displayValue = displayValue;
+    this.animationTime = animationTime;
+    window.requestAnimationFrame(this.animation.bind(this));
+}
+var a = true;
+Gauge.prototype.animation = function (time) {
+    if (!this.lastTime) {
+        this.lastTime = time;
+        this.firstTime = time;
+    }
+    else {
+        const gameTime = time - this.lastTime;
+        this.lastTime = time;
+        this.currentValue += (this.value - this.min) * gameTime / this.animationTime;
+    }
+    this.changeValue(this.currentValue, this.displayValue);
+    if (this.currentValue < this.value) {
+        window.requestAnimationFrame(this.animation.bind(this));
+    } else {
+        this.changeValue(this.value, this.displayValue);
+    }
 }
 
 function Color(r, g, b) {

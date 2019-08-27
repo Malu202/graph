@@ -63,7 +63,6 @@ Plot.prototype.applyDefaultSettings = function () {
 
     for (var j in defaultPlotSettings) {
         if (this[j] == undefined) {
-            console.log("replaced ", j, ":", this[j], " with ", j, ":", defaultPlotSettings[j])
             this[j] = defaultPlotSettings[j];
         }
     }
@@ -165,7 +164,6 @@ Plot.prototype.calculateDrawingProperties = function () {
     this.calculateDrawingPropertiesY();
 
     if (this.xLabelNames) {
-        console.log("custom labels")
         this.gridLineCountX = this.xLabelNames.length;
         this.drawingStepSizeX = this.xAxisWidth / (this.gridLineCountX - 1);;
         this.dataStepSizeX = this.xDataRange / (this.gridLineCountX - 1);
@@ -184,7 +182,6 @@ Plot.prototype.calculateDrawingPropertiesX = function () {
     //var longestValueX = round(this.maxPlottingX + this.dataStepSizeX, this.xAxisLabelMaxDecimals).toString().length
     var longestValueX = round(this.maxPlottingX, this.xAxisLabelMaxDecimals).toString().length
 
-    console.log("longestValueX", longestValueX, "maxPlottingX", this.maxPlottingX, "dataStepSizeX", this.dataStepSizeX, "xAxisLabelMaxDecimals", this.xAxisLabelMaxDecimals)
     this.longestLabelX = longestValueX + this.xAxisLabelPrefix.length + this.xAxisLabelSuffix.length;
     this.labelHeightX = this.xAxisHeight;
     this.longestLabelWidthX = this.longestLabelX * this.labelHeightX;
@@ -205,7 +202,6 @@ Plot.prototype.calculateStepSizeX = function () {
     this.preferredLabelStepsX.forEach(function (label, index) {
         labelSteps[index] *= orderX;
     });
-    console.log(labelSteps)
     for (var i = 0; i < labelSteps.length; i++) {
         var errorTop = labelSteps[i] - this.maxX % labelSteps[i];
         if (errorTop == labelSteps[i]) errorTop = 0;
@@ -214,7 +210,6 @@ Plot.prototype.calculateStepSizeX = function () {
         var minX = this.minX - errorBottom;
         var maxX = this.maxX + errorTop;
 
-        console.log(minX, this.minY, maxX, this.maxY)
 
         this.gridLineCountX = ((maxX - minX) / labelSteps[i]) + 1;
         this.drawingStepSizeX = this.xAxisWidth / (this.gridLineCountX - 1);
