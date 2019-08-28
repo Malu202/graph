@@ -1,3 +1,6 @@
+//Damit closure compiler nicht Plot minified
+window['Plot'] = Plot;
+
 function Plot(canvas, config) {
 
     for (var k in config) {
@@ -45,7 +48,7 @@ Plot.prototype.applyDefaultSettings = function () {
 
     var defaultGraphSettings = {
         type: "line",
-        color: WHITE,
+        color: "#fff",
         linewidth: 5,
         dataPointRadius: 4,
         dataPointLinewidth: 2,
@@ -53,8 +56,8 @@ Plot.prototype.applyDefaultSettings = function () {
         yHighlight: [],
     }
     var defaultShadowGraphSettings = {
-        color: WHITE,
-        shadowColor: LIGHT_PRIMARY,
+        color: "#fff",
+        shadowColor: "#80e27e",
         linewidth: 4,
         dataPointRadius: 1.5,
         xHighlight: [],
@@ -287,7 +290,7 @@ Plot.prototype.drawAxis = function () {
         if (fillAbleDigitCount > this.yAxisLabelMaxDecimals) fillAbleDigitCount = this.yAxisLabelMaxDecimals;
         labelValue = fillWithDecimalZeros(labelValue, fillAbleDigitCount);
         labelValue = this.yAxisLabelPrefix + labelValue + this.yAxisLabelSuffix;
-        xMargins = this.yAxisWidth - (this.longestLabelY * this.labelHeightY) / 2;
+        const xMargins = this.yAxisWidth - (this.longestLabelY * this.labelHeightY) / 2;
 
         drawTextWithHeight(labelValue, xMargins, y, this.labelHeightY, "#fff", this.ctx);
         if (this.drawGridLineX) drawGridLineX("#fff", this.leftOffset, y, this.width - this.leftOffset - this.rightOffset, this.ctx)

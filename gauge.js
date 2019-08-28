@@ -1,3 +1,6 @@
+//Damit closure compiler nicht Plot minified
+window['Gauge'] = Gauge;
+
 function Gauge(canvas, value, displayValue, min, max, background, textColor) {
     if ((displayValue == null) || (displayValue == "")) displayValue = value;
 
