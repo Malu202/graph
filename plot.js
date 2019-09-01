@@ -4,11 +4,7 @@ window['Plot'] = Plot;
 function Plot(div, config) {
     this.doWhenLoaded(function () {
 
-        const dimensions = div.getBoundingClientRect();
-        const canvas = document.createElement('canvas');
-        canvas.width = dimensions.width;
-        canvas.height = dimensions.height;
-        div.appendChild(canvas);
+        const canvas = this.generateCanvas(div);
 
         for (var k in config) {
             this[k] = config[k];
@@ -32,6 +28,30 @@ function Plot(div, config) {
         this.scaleData();
     });
 }
+
+
+Plot.prototype.generateCanvas = function (div) {
+    const dimensions = div.getBoundingClientRect();
+    const canvas = document.createElement('canvas');
+    canvas.width = dimensions.width;
+    canvas.height = dimensions.height;
+
+    div.style.position = "relative";
+    div.style.right = "0px";
+    div.style.top = "0px";
+    div.style.left = "0px";
+    div.style.bottom = "0px";
+
+    canvas.style.position = "absolute";
+    canvas.style.right = "0px";
+    canvas.style.top = "0px";
+    canvas.style.left = "0px";
+    canvas.style.bottom = "0px";
+
+    div.appendChild(canvas);
+    return canvas;
+}
+
 Plot.prototype.applyDefaultSettings = function () {
     var defaultPlotSettings = {
         backgroundColor: "#4caf50",

@@ -3,13 +3,8 @@ window['Gauge'] = Gauge;
 
 function Gauge(div, value, displayValue, min, max, background, textColor) {
     this.doWhenLoaded(function () {
+        const canvas = this.generateCanvas(div);
 
-
-        const dimensions = div.getBoundingClientRect();
-        const canvas = document.createElement('canvas');
-        canvas.width = dimensions.width;
-        canvas.height = dimensions.height;
-        div.appendChild(canvas);
 
         if ((displayValue == null) || (displayValue == "")) displayValue = value;
 
@@ -28,6 +23,28 @@ function Gauge(div, value, displayValue, min, max, background, textColor) {
 
         // this.changeValue(value, displayValue)
     });
+}
+
+Gauge.prototype.generateCanvas = function (div) {
+    const dimensions = div.getBoundingClientRect();
+    const canvas = document.createElement('canvas');
+    canvas.width = dimensions.width;
+    canvas.height = dimensions.height;
+
+    div.style.position = "relative";
+    div.style.right = "0px";
+    div.style.top = "0px";
+    div.style.left = "0px";
+    div.style.bottom = "0px";
+
+    canvas.style.position = "absolute";
+    canvas.style.right = "0px";
+    canvas.style.top = "0px";
+    canvas.style.left = "0px";
+    canvas.style.bottom = "0px";
+
+    div.appendChild(canvas);
+    return canvas;
 }
 
 Gauge.prototype.changeValue = function (value, displayValue) {
