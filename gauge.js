@@ -2,28 +2,32 @@
 window['Gauge'] = Gauge;
 
 function Gauge(div, value, displayValue, min, max, background, textColor) {
-    const dimensions = div.getBoundingClientRect();
-    const canvas = document.createElement('canvas');
-    canvas.width = dimensions.width;
-    canvas.height = dimensions.height;
-    div.appendChild(canvas);
+    this.doWhenLoaded(function () {
 
-    if ((displayValue == null) || (displayValue == "")) displayValue = value;
 
-    this.height = canvas.height;
-    this.width = canvas.width;
-    if (this.height < this.width) {
-        this.size = this.height;
-    } else {
-        this.size = this.width;
-    }
-    this.min = min;
-    this.max = max;
-    this.ctx = canvas.getContext("2d");
-    canvas.style["background-color"] = background;
-    this.textColor = textColor;
+        const dimensions = div.getBoundingClientRect();
+        const canvas = document.createElement('canvas');
+        canvas.width = dimensions.width;
+        canvas.height = dimensions.height;
+        div.appendChild(canvas);
 
-    // this.changeValue(value, displayValue)
+        if ((displayValue == null) || (displayValue == "")) displayValue = value;
+
+        this.height = canvas.height;
+        this.width = canvas.width;
+        if (this.height < this.width) {
+            this.size = this.height;
+        } else {
+            this.size = this.width;
+        }
+        this.min = min;
+        this.max = max;
+        this.ctx = canvas.getContext("2d");
+        canvas.style["background-color"] = background;
+        this.textColor = textColor;
+
+        // this.changeValue(value, displayValue)
+    });
 }
 
 Gauge.prototype.changeValue = function (value, displayValue) {
@@ -52,12 +56,13 @@ Gauge.prototype.changeValue = function (value, displayValue) {
 }
 
 Gauge.prototype.animateValue = function (value, displayValue, animationTime) {
-
-    this.currentValue = this.min;
-    this.value = value;
-    this.displayValue = displayValue;
-    this.animationTime = animationTime;
-    window.requestAnimationFrame(this.animation.bind(this));
+    this.doWhenLoaded(function () {
+        this.currentValue = this.min;
+        this.value = value;
+        this.displayValue = displayValue;
+        this.animationTime = animationTime;
+        window.requestAnimationFrame(this.animation.bind(this));
+    });
 }
 var a = true;
 Gauge.prototype.animation = function (time) {
@@ -97,3 +102,20 @@ function Color(r, g, b) {
     }
 }
 
+
+var loaded = false;
+window.addEventListener("load", function () {
+    loaded = true;
+});
+
+Gauge.prototype.doWhenLoaded = function (callback) {
+    if (loaded) {
+        const c = callback.bind(this);
+        c();
+    } else {
+        window.addEventListener("load", function () {
+            const c = callback.bind(this);
+            c();
+        }.bind(this));
+    }
+}

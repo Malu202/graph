@@ -2,32 +2,35 @@
 window['Plot'] = Plot;
 
 function Plot(div, config) {
-    const dimensions = div.getBoundingClientRect();
-    const canvas = document.createElement('canvas');
-    canvas.width = dimensions.width;
-    canvas.height = dimensions.height;
-    div.appendChild(canvas);
+    this.doWhenLoaded(function () {
 
-    for (var k in config) {
-        this[k] = config[k];
-    }
-    this.applyDefaultSettings();
+        const dimensions = div.getBoundingClientRect();
+        const canvas = document.createElement('canvas');
+        canvas.width = dimensions.width;
+        canvas.height = dimensions.height;
+        div.appendChild(canvas);
 
-    this.bottomMargin = 0;
+        for (var k in config) {
+            this[k] = config[k];
+        }
+        this.applyDefaultSettings();
 
-    this.canvas = canvas;
-    this.ctx = canvas.getContext("2d");
+        this.bottomMargin = 0;
 
-    this.height = canvas.height;
-    this.width = canvas.width;
+        this.canvas = canvas;
+        this.ctx = canvas.getContext("2d");
 
-    canvas.style["background-color"] = this.backgroundColor;
+        this.height = canvas.height;
+        this.width = canvas.width;
 
-    // this.graphs = config.graphs;
-    this.calculateDataRanges();
-    this.calculateDrawingRanges();
-    this.calculateDrawingProperties();
-    this.scaleData();
+        canvas.style["background-color"] = this.backgroundColor;
+
+        // this.graphs = config.graphs;
+        this.calculateDataRanges();
+        this.calculateDrawingRanges();
+        this.calculateDrawingProperties();
+        this.scaleData();
+    });
 }
 Plot.prototype.applyDefaultSettings = function () {
     var defaultPlotSettings = {
@@ -509,4 +512,23 @@ function fillWithDecimalZeros(number, amount) {
         number += "0";
     }
     return number;
+}
+
+
+
+var loaded = false;
+window.addEventListener("load", function () {
+    loaded = true;
+});
+
+Plot.prototype.doWhenLoaded = function (callback) {
+    if (loaded) {
+        const c = callback.bind(this);
+        c();
+    } else {
+        window.addEventListener("load", function () {
+            const c = callback.bind(this);
+            c();
+        }.bind(this));
+    }
 }
