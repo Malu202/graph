@@ -12,6 +12,11 @@ function Gauge(div, value, displayValue, min, max, background, textColor) {
 
     this.height = canvas.height;
     this.width = canvas.width;
+    if (this.height < this.width) {
+        this.size = this.height;
+    } else {
+        this.size = this.width;
+    }
     this.min = min;
     this.max = max;
     this.ctx = canvas.getContext("2d");
@@ -25,7 +30,7 @@ Gauge.prototype.changeValue = function (value, displayValue) {
     this.ctx.clearRect(0, 0, this.width, this.height);
 
     const textString = displayValue + "";
-    const textSize = this.width / textString.length;
+    const textSize = this.size / textString.length;
     this.ctx.font = "bold " + textSize + "px Arial, Helvetica, sans-serif";
     this.ctx.fillStyle = this.textColor;
     this.ctx.textAlign = "center";
@@ -35,14 +40,14 @@ Gauge.prototype.changeValue = function (value, displayValue) {
     const interPolationValue = (value - this.min) / (this.max - this.min);
 
     this.ctx.beginPath();
-    this.ctx.lineWidth = 8;
+    this.ctx.lineWidth = this.size * 0.08;
     var color1 = new Color(0, 0, 255);
     var color2 = new Color(255, 0, 0);
     this.ctx.strokeStyle = (color1.mix(color2, interPolationValue)).rgb();
 
     const startAngle = Math.PI - Math.PI / 4;
     const endAngle = Math.PI / 4 - (1 - interPolationValue) * (Math.PI + Math.PI / 2);
-    this.ctx.arc(this.width / 2, this.height / 2, 0.9 * this.height / 2, startAngle, endAngle, false);
+    this.ctx.arc(this.width / 2, this.height / 2, 0.9 * this.size / 2, startAngle, endAngle, false);
     this.ctx.stroke();
 }
 
