@@ -52,7 +52,7 @@ mockupDataX.forEach(function (value, index) {
 mockupDataY.forEach(function (value, index) {
     mockupDataY[index] *= 1;
 })
-var can = document.getElementById("canvas");
+var can = document.getElementById("plot");
 var plot;
 window.onload = function () {
 

@@ -1,7 +1,12 @@
 //Damit closure compiler nicht Plot minified
 window['Plot'] = Plot;
 
-function Plot(canvas, config) {
+function Plot(div, config) {
+    const dimensions = div.getBoundingClientRect();
+    const canvas = document.createElement('canvas');
+    canvas.width = dimensions.width;
+    canvas.height = dimensions.height;
+    div.appendChild(canvas);
 
     for (var k in config) {
         this[k] = config[k];
@@ -313,7 +318,7 @@ Plot.prototype.drawAxis = function () {
         labelValue = this.xAxisLabelPrefix + labelValue + this.xAxisLabelSuffix;
         var yMargins = this.xAxisHeight / (2);
 
-        if(this.equalLabelSize && this.labelHeightX > this.labelHeightY) this.labelHeightX = this.labelHeightY;
+        if (this.equalLabelSize && this.labelHeightX > this.labelHeightY) this.labelHeightX = this.labelHeightY;
         drawTextWithHeight(labelValue, x - (labelValue.length * this.labelHeightX) / 4, this.height - this.bottomOffset + yMargins, this.labelHeightX, "#fff", this.ctx);
         if (this.drawGridLineY) drawGridLineY("#fff", x, this.height - this.bottomOffset, this.height - this.topOffset - this.bottomOffset, this.ctx)
     }

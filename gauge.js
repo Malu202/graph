@@ -1,7 +1,13 @@
 //Damit closure compiler nicht Plot minified
 window['Gauge'] = Gauge;
 
-function Gauge(canvas, value, displayValue, min, max, background, textColor) {
+function Gauge(div, value, displayValue, min, max, background, textColor) {
+    const dimensions = div.getBoundingClientRect();
+    const canvas = document.createElement('canvas');
+    canvas.width = dimensions.width;
+    canvas.height = dimensions.height;
+    div.appendChild(canvas);
+
     if ((displayValue == null) || (displayValue == "")) displayValue = value;
 
     this.height = canvas.height;

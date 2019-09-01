@@ -30,3 +30,5 @@ gulp.task('minifyGauge', function () {
           }))
         .pipe(gulp.dest("./"));
   });
+
+  gulp.task('minify', gulp.parallel(["minifyPlot", "minifyGauge"]))
