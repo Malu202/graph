@@ -37,16 +37,16 @@ Plot.prototype.generateCanvas = function (div) {
     canvas.height = dimensions.height;
 
     div.style.position = "relative";
-    div.style.right = "0px";
+    // div.style.right = "0px";
     div.style.top = "0px";
     div.style.left = "0px";
-    div.style.bottom = "0px";
+    // div.style.bottom = "0px";
 
     canvas.style.position = "absolute";
-    canvas.style.right = "0px";
+    // canvas.style.right = "0px";
     canvas.style.top = "0px";
     canvas.style.left = "0px";
-    canvas.style.bottom = "0px";
+    // canvas.style.bottom = "0px";
 
     div.appendChild(canvas);
     return canvas;
