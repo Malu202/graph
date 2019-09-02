@@ -4,7 +4,7 @@ window['Plot'] = Plot;
 function Plot(div, config) {
     this.doWhenLoaded(function () {
 
-        const canvas = this.generateCanvas(div);
+        this.generateCanvas(div);
 
         for (var k in config) {
             this[k] = config[k];
@@ -13,13 +13,10 @@ function Plot(div, config) {
 
         this.bottomMargin = 0;
 
-        this.canvas = canvas;
-        this.ctx = canvas.getContext("2d");
+        this.ctx = this.canvas.getContext("2d");
 
-        this.height = canvas.height;
-        this.width = canvas.width;
 
-        canvas.style["background-color"] = this.backgroundColor;
+        this.canvas.style["background-color"] = this.backgroundColor;
 
         // this.graphs = config.graphs;
         this.calculateDataRanges();
@@ -31,10 +28,16 @@ function Plot(div, config) {
 
 
 Plot.prototype.generateCanvas = function (div) {
+    const dpr = window.devicePixelRatio || 1;
+
     const dimensions = div.getBoundingClientRect();
     const canvas = document.createElement('canvas');
-    canvas.width = dimensions.width;
-    canvas.height = dimensions.height;
+    this.height = dimensions.height;
+    this.width = dimensions.width;
+    canvas.width = dimensions.width * dpr;
+    canvas.height = dimensions.height * dpr;
+    this.ctx = canvas.getContext('2d');
+    this.ctx.scale(dpr, dpr);
 
     div.style.position = "relative";
     // div.style.right = "0px";
@@ -47,9 +50,11 @@ Plot.prototype.generateCanvas = function (div) {
     canvas.style.top = "0px";
     canvas.style.left = "0px";
     // canvas.style.bottom = "0px";
+    canvas.style.height = "100%";
+    canvas.style.width = "100%";
 
     div.appendChild(canvas);
-    return canvas;
+    this.canvas = canvas;
 }
 
 Plot.prototype.applyDefaultSettings = function () {

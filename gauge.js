@@ -3,13 +3,14 @@ window['Gauge'] = Gauge;
 
 function Gauge(div, value, displayValue, min, max, background, textColor) {
     this.doWhenLoaded(function () {
-        const canvas = this.generateCanvas(div);
+        // const canvas = this.generateCanvas(div);
+        this.generateCanvas(div);
 
 
         if ((displayValue == null) || (displayValue == "")) displayValue = value;
 
-        this.height = canvas.height;
-        this.width = canvas.width;
+        // this.height = this.canvas.height;
+        // this.width = this.canvas.width;
         if (this.height < this.width) {
             this.size = this.height;
         } else {
@@ -17,8 +18,8 @@ function Gauge(div, value, displayValue, min, max, background, textColor) {
         }
         this.min = min;
         this.max = max;
-        this.ctx = canvas.getContext("2d");
-        canvas.style["background-color"] = background;
+        // this.ctx = canvas.getContext("2d");
+        this.canvas.style["background-color"] = background;
         this.textColor = textColor;
 
         // this.changeValue(value, displayValue)
@@ -30,10 +31,12 @@ Gauge.prototype.generateCanvas = function (div) {
 
     const dimensions = div.getBoundingClientRect();
     const canvas = document.createElement('canvas');
+    this.height = dimensions.height;
+    this.width = dimensions.width;
     canvas.width = dimensions.width * dpr;
     canvas.height = dimensions.height * dpr;
-    console.log(dpr)
-    canvas.getContext('2d').scale(1/dpr, 1/dpr);
+    this.ctx = canvas.getContext('2d');
+    this.ctx.scale(dpr, dpr);
 
     div.style.position = "relative";
     // div.style.right = "0px";
@@ -42,13 +45,15 @@ Gauge.prototype.generateCanvas = function (div) {
     // div.style.bottom = "0px";
 
     canvas.style.position = "absolute";
-    canvas.style.right = "0px";
+    // canvas.style.right = "0px";
     canvas.style.top = "0px";
     canvas.style.left = "0px";
-    canvas.style.bottom = "0px";
+    // canvas.style.bottom = "0px";
+    canvas.style.height = "100%";
+    canvas.style.width = "100%";
 
     div.appendChild(canvas);
-    return canvas;
+    this.canvas = canvas;
 }
 
 Gauge.prototype.changeValue = function (value, displayValue) {
