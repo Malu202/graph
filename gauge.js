@@ -31,10 +31,10 @@ Gauge.prototype.generateCanvas = function (div) {
 
     const dimensions = div.getBoundingClientRect();
     const canvas = document.createElement('canvas');
-    this.height = dimensions.height;
-    this.width = dimensions.width;
-    canvas.width = dimensions.width * dpr;
-    canvas.height = dimensions.height * dpr;
+    this.width = Math.round(dimensions.width);
+    this.height = Math.round(dimensions.height);
+    canvas.width = this.width * dpr;
+    canvas.height = this.height * dpr;
     this.ctx = canvas.getContext('2d');
     this.ctx.scale(dpr, dpr);
 
