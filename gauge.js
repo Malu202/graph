@@ -26,10 +26,13 @@ function Gauge(div, value, displayValue, min, max, background, textColor) {
 }
 
 Gauge.prototype.generateCanvas = function (div) {
+    const dpr = window.devicePixelRatio || 1;
+
     const dimensions = div.getBoundingClientRect();
     const canvas = document.createElement('canvas');
-    canvas.width = dimensions.width;
-    canvas.height = dimensions.height;
+    canvas.width = dimensions.width * dpr;
+    canvas.height = dimensions.height * dpr;
+    canvas.getContext('2d').scale(1/dpr, 1/dpr);
 
     div.style.position = "relative";
     // div.style.right = "0px";
@@ -38,10 +41,10 @@ Gauge.prototype.generateCanvas = function (div) {
     // div.style.bottom = "0px";
 
     canvas.style.position = "absolute";
-    // canvas.style.right = "0px";
+    canvas.style.right = "0px";
     canvas.style.top = "0px";
     canvas.style.left = "0px";
-    // canvas.style.bottom = "0px";
+    canvas.style.bottom = "0px";
 
     div.appendChild(canvas);
     return canvas;
