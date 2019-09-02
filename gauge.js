@@ -32,6 +32,7 @@ Gauge.prototype.generateCanvas = function (div) {
     const canvas = document.createElement('canvas');
     canvas.width = dimensions.width * dpr;
     canvas.height = dimensions.height * dpr;
+    console.log(dpr)
     canvas.getContext('2d').scale(1/dpr, 1/dpr);
 
     div.style.position = "relative";
