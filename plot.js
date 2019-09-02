@@ -40,6 +40,7 @@ Plot.prototype.generateCanvas = function (div) {
     this.ctx.scale(dpr, dpr);
 
     div.style.position = "relative";
+    div.style.overflow = "hidden";
     // div.style.right = "0px";
     div.style.top = "0px";
     div.style.left = "0px";
