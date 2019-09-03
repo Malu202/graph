@@ -51,8 +51,8 @@ Plot.prototype.generateCanvas = function (div) {
     canvas.style.top = "0px";
     canvas.style.left = "0px";
     // canvas.style.bottom = "0px";
-    canvas.style.height = dimensions.height + "px";
-    canvas.style.width = dimensions.width + "px";
+    canvas.style.height = this.height + "px";
+    canvas.style.width = this.width + "px";
 
     div.appendChild(canvas);
     this.canvas = canvas;
