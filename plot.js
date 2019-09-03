@@ -194,7 +194,7 @@ Plot.prototype.calculateLabelHeightYaxis = function () {
     if (isNaN(longestValue) && (!isNaN(this.maxPlottingY + this.dataStepSizeY))) console.error("To many decimals, or numbers to long, cannot round, try reducing MaxDecimals");
     var longestValueLength = longestValue.toString().length;
     this.longestLabelY = longestValueLength + this.yAxisLabelPrefix.length + this.yAxisLabelSuffix.length;
-    this.labelHeightY = 1.80 * this.yAxisWidth / (this.longestLabelY);//old: 19,5
+    this.labelHeightY = 1 * this.yAxisWidth / (this.longestLabelY);//old: 19,5
 }
 Plot.prototype.calculateDrawingProperties = function () {
     this.calculateDrawingPropertiesX();
@@ -386,11 +386,14 @@ function drawTextWithHeight(text, x, y, height, color, ctx) {
     var y = y / zoomFactor;// + height/(zoomFactor);
 
     ctx.save()
-    ctx.font = "20px sans serif";
+    // ctx.font = "20px sans serif";
+    ctx.font = 20 + "px Arial, Helvetica, sans-serif";
     ctx.fillStyle = color
     ctx.scale(zoomFactor, zoomFactor); // enlarge 5x
 
-    y += height / (3 * zoomFactor);
+    // y += height / (3 * zoomFactor);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
     ctx.fillText(text, x, y);
     ctx.restore()
 }
