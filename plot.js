@@ -194,7 +194,7 @@ Plot.prototype.calculateLabelHeightYaxis = function () {
     if (isNaN(longestValue) && (!isNaN(this.maxPlottingY + this.dataStepSizeY))) console.error("To many decimals, or numbers to long, cannot round, try reducing MaxDecimals");
     var longestValueLength = longestValue.toString().length;
     this.longestLabelY = longestValueLength + this.yAxisLabelPrefix.length + this.yAxisLabelSuffix.length;
-    this.labelHeightY = 1 * this.yAxisWidth / (this.longestLabelY);//old: 19,5
+    this.labelHeightY = 1.5 * this.yAxisWidth / (this.longestLabelY);//old: 19,5
 }
 Plot.prototype.calculateDrawingProperties = function () {
     this.calculateDrawingPropertiesX();
@@ -324,7 +324,8 @@ Plot.prototype.drawAxis = function () {
         if (fillAbleDigitCount > this.yAxisLabelMaxDecimals) fillAbleDigitCount = this.yAxisLabelMaxDecimals;
         labelValue = fillWithDecimalZeros(labelValue, fillAbleDigitCount);
         labelValue = this.yAxisLabelPrefix + labelValue + this.yAxisLabelSuffix;
-        const xMargins = this.yAxisWidth - (this.longestLabelY * this.labelHeightY) / 2;
+        // const xMargins = this.yAxisWidth - (this.longestLabelY * this.labelHeightY) / 2;
+        const xMargins = this.yAxisWidth / 2;
 
         drawTextWithHeight(labelValue, xMargins, y, this.labelHeightY, "#fff", this.ctx);
         if (this.drawGridLineX) drawGridLineX("#fff", this.leftOffset, y, this.width - this.leftOffset - this.rightOffset, this.ctx)
@@ -348,7 +349,7 @@ Plot.prototype.drawAxis = function () {
         var yMargins = this.xAxisHeight / (2);
 
         if (this.equalLabelSize && this.labelHeightX > this.labelHeightY) this.labelHeightX = this.labelHeightY;
-        drawTextWithHeight(labelValue, x - (labelValue.length * this.labelHeightX) / 4, this.height - this.bottomOffset + yMargins, this.labelHeightX, "#fff", this.ctx);
+        drawTextWithHeight(labelValue, x, this.height - this.bottomOffset + yMargins, this.labelHeightX, "#fff", this.ctx);
         if (this.drawGridLineY) drawGridLineY("#fff", x, this.height - this.bottomOffset, this.height - this.topOffset - this.bottomOffset, this.ctx)
     }
 }
