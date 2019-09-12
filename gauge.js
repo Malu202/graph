@@ -2,6 +2,24 @@
 window['Gauge'] = Gauge;
 
 function Gauge(div, value, displayValue, min, max, background, textColor) {
+    this.initialize(div, value, displayValue, min, max, background, textColor);
+
+    this.div = div;
+    this.value = value;
+    this.displayValue = displayValue;
+    this.min = min;
+    this.max = max;
+    this.background = background;
+    this.textColor = textColor;
+
+    window.addEventListener('resize', function (event) {
+        console.log(this.min)
+        this.initialize(this.div, this.value, this.displayValue, this.min, this.max, this.background, this.textColor);
+        this.changeValue(this.value, this.displayValue)
+    }.bind(this));
+}
+
+Gauge.prototype.initialize = function (div, value, displayValue, min, max, background, textColor) {
     this.doWhenLoaded(function () {
         // const canvas = this.generateCanvas(div);
         this.generateCanvas(div);
@@ -53,6 +71,7 @@ Gauge.prototype.generateCanvas = function (div) {
     canvas.style.height = this.height + "px";
     canvas.style.width = this.width + "px";
 
+    div.innerHTML = "";
     div.appendChild(canvas);
     this.canvas = canvas;
 }

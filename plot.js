@@ -2,6 +2,16 @@
 window['Plot'] = Plot;
 
 function Plot(div, config) {
+    this.div = div;
+    this.config = config;
+    this.initialize(div, config);
+
+    window.addEventListener('resize', function (event) {
+        this.initialize(this.div, this.config);
+    }.bind(this));
+}
+
+Plot.prototype.initialize = function (div, config) {
     this.doWhenLoaded(function () {
 
         this.generateCanvas(div);
@@ -23,6 +33,7 @@ function Plot(div, config) {
         this.calculateDrawingRanges();
         this.calculateDrawingProperties();
         this.scaleData();
+        this.draw();
     });
 }
 
@@ -54,6 +65,7 @@ Plot.prototype.generateCanvas = function (div) {
     canvas.style.height = this.height + "px";
     canvas.style.width = this.width + "px";
 
+    div.innerHTML = "";
     div.appendChild(canvas);
     this.canvas = canvas;
 }

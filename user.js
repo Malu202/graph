@@ -114,8 +114,6 @@ window.onload = function () {
             // }
         ]
     })
-
-    plot.draw();
 };
 
 
