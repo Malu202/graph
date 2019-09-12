@@ -6,7 +6,6 @@ function Gauge(div, prefix, value, suffix, min, max, background, textColor) {
     this.initialize(div, prefix, value, suffix, min, max, background, textColor);
 
     window.addEventListener('resize', function (event) {
-        console.log(this.min)
         this.initialize(this.div, this.prefix, this.value, this.suffix, this.min, this.max, this.background, this.textColor);
         this.setValue(value);
     }.bind(this));
@@ -104,11 +103,10 @@ Gauge.prototype.setValue = function (value, displayValue) {
     this.ctx.stroke();
 }
 
-Gauge.prototype.animateValue = function (value, displayValue, animationTime) {
+Gauge.prototype.animateValue = function (value, animationTime) {
     this.doWhenLoaded(function () {
         this.currentValue = this.min;
         this.value = value;
-        this.displayValue = displayValue;
         this.animationTime = animationTime;
         window.requestAnimationFrame(this.animation.bind(this));
     });
