@@ -119,6 +119,6 @@ window.onload = function () {
 
 var gaugeCanvas = document.getElementById("gauge");
 
-var gauge = new Gauge(gaugeCanvas, 25, "25°", 5, 40, "#fff", "#000");
+var gauge = new Gauge(gaugeCanvas, "", 25, "°", 5, 40, "#fff", "#000");
 
 gauge.animateValue(25, "25°", 800)

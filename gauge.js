@@ -1,34 +1,30 @@
 //Damit closure compiler nicht Plot minified
 window['Gauge'] = Gauge;
 
-function Gauge(div, value, displayValue, min, max, background, textColor) {
-    this.initialize(div, value, displayValue, min, max, background, textColor);
+function Gauge(div, prefix, value, suffix, min, max, background, textColor) {
 
-    this.div = div;
-    this.value = value;
-    this.displayValue = displayValue;
-    this.min = min;
-    this.max = max;
-    this.background = background;
-    this.textColor = textColor;
+    this.initialize(div, prefix, value, suffix, min, max, background, textColor);
 
     window.addEventListener('resize', function (event) {
         console.log(this.min)
-        this.initialize(this.div, this.value, this.displayValue, this.min, this.max, this.background, this.textColor);
-        this.changeValue(this.value, this.displayValue)
+        this.initialize(this.div, this.prefix, this.value, this.suffix, this.min, this.max, this.background, this.textColor);
+        this.setValue(value);
     }.bind(this));
 }
 
-Gauge.prototype.initialize = function (div, value, displayValue, min, max, background, textColor) {
+Gauge.prototype.initialize = function (div, prefix, value, suffix, min, max, background, textColor) {
     this.doWhenLoaded(function () {
-        // const canvas = this.generateCanvas(div);
+        this.div = div;
+        this.prefix = prefix;
+        this.value = value;
+        this.suffix = suffix;
+        this.min = min;
+        this.max = max;
+        this.background = background;
+        this.textColor = textColor;
+
         this.generateCanvas(div);
 
-
-        if ((displayValue == null) || (displayValue == "")) displayValue = value;
-
-        // this.height = this.canvas.height;
-        // this.width = this.canvas.width;
         if (this.height < this.width) {
             this.size = this.height;
         } else {
@@ -76,16 +72,23 @@ Gauge.prototype.generateCanvas = function (div) {
     this.canvas = canvas;
 }
 
-Gauge.prototype.changeValue = function (value, displayValue) {
+Gauge.prototype.setValue = function (value, displayValue) {
+    if(displayValue == undefined) displayValue = value;
     this.ctx.clearRect(0, 0, this.width, this.height);
 
-    const textString = displayValue + "";
+    const missingDigits = (this.max + "").length - (displayValue + "").length;
+    var missingDigitPrefix = "";
+    for (var i = 0; i < missingDigits; i++) {
+        missingDigitPrefix = " " + missingDigitPrefix;
+    }
+
+    const textString = missingDigitPrefix + this.prefix + displayValue + this.suffix + "";
     const textSize = this.size / textString.length;
     this.ctx.font = "bold " + textSize + "px Arial, Helvetica, sans-serif";
     this.ctx.fillStyle = this.textColor;
     this.ctx.textAlign = "center";
     this.ctx.textBaseline = "middle";
-    this.ctx.fillText(displayValue, this.width / 2, this.height / 2);
+    this.ctx.fillText(textString, this.width / 2, this.height / 2);
 
     const interPolationValue = (value - this.min) / (this.max - this.min);
 
@@ -121,11 +124,11 @@ Gauge.prototype.animation = function (time) {
         this.lastTime = time;
         this.currentValue += (this.value - this.min) * gameTime / this.animationTime;
     }
-    this.changeValue(this.currentValue, this.displayValue);
+    this.setValue(this.currentValue, this.value);
     if (this.currentValue < this.value) {
         window.requestAnimationFrame(this.animation.bind(this));
     } else {
-        this.changeValue(this.value, this.displayValue);
+        this.setValue(this.value, this.value);
     }
 }
 
