@@ -35,6 +35,9 @@ var mockupGraph2 = generateMockupData(1, 0, zeroToFour, 48);
 
 var mockupDataX = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 var mockupDataY = [25.1, 27, 27, 28, 29, 30, 38.1, 35, 30, 30];
+
+// mockupDataX = [];
+// mockupDataY = [];
 var buggyMockupDataY = [0.00017094748045652888, 0.0002406692375423506, 0.00029930605391475666, 0.00044559388424584277, 0.0005668682010598125, 0.0008381252344964803, 0.0009519918634124083,
     0.001226519993767387, 0.0015778168403227971, 0.002095818579230104, 0.0025214712442207907, 0.002967875488764029, 0.003454149369477609, 0.004167987934936454, 0.0048293124037483304, 0.005399415523252183,
     0.006410584260191669, 0.007048544448525713, 0.007566367057533391, 0.008045700155732798, 0.008616860338402789, 0.009085583118554647, 0.009302945953344929, 0.009396008056418062, 0.009406621167307077,
@@ -74,26 +77,30 @@ window.onload = function () {
         drawGridLineY: true,
         preferredLabelStepsX: [1, 2, 2.5, 5],
         preferredLabelStepsY: [1, 2, 2.5, 5],
-        xLabelNames: ["null", "eins", "zwei", "drei", "vier", "fünf", "sechs", "sieben", "acht", "neun"],
+        // xLabelNames: ["null", "eins", "zwei", "drei", "vier", "fünf", "sechs", "sieben", "acht", "neun"],
         equalLabelSize: true,
         // xLabelNames: ["null", "eins", "zwei", "drei"],
+        interpolationSteps: 100,
 
         graphs: [
             {
                 type: "line",
+                interpolate: "polynomial",
                 color: WHITE,
                 linewidth: 5,
                 dataPointRadius: 4,
                 dataPointLinewidth: 2,
                 // x: mockupDataX,
                 // y: mockupDataY,
-                x: buggyMockupDataX,
-                y: buggyMockupDataY,
+                x: mockupDataX,
+                y: mockupDataY,
 
                 // x: mockupGraph1.x,
                 // y: mockupGraph1.y,
                 // xHighlight: mockupGraph1.xHighlight,
                 // yHighlight: mockupGraph1.yHighlight
+                xHighlight: mockupDataX,
+                yHighlight: mockupDataY,
 
             }
             // ,

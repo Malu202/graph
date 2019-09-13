@@ -7,14 +7,13 @@ function Plot(div, config) {
     this.initialize(div, config);
 
     window.addEventListener('resize', function (event) {
-        this.initialize(this.div, this.config);
+        this.paintPlot();
     }.bind(this));
 }
 
 Plot.prototype.initialize = function (div, config) {
     this.doWhenLoaded(function () {
-
-        this.generateCanvas(div);
+        this.div = div;
 
         for (var k in config) {
             this[k] = config[k];
@@ -23,18 +22,20 @@ Plot.prototype.initialize = function (div, config) {
 
         this.bottomMargin = 0;
 
-        this.ctx = this.canvas.getContext("2d");
 
 
-        this.canvas.style["background-color"] = this.backgroundColor;
-
-        // this.graphs = config.graphs;
         this.calculateDataRanges();
-        this.calculateDrawingRanges();
-        this.calculateDrawingProperties();
-        this.scaleData();
-        this.draw();
+        this.paintPlot();
     });
+}
+
+Plot.prototype.paintPlot = function () {
+
+    this.generateCanvas(this.div);
+    this.calculateDrawingRanges();
+    this.calculateDrawingProperties();
+    this.scaleData();
+    this.draw();
 }
 
 
@@ -52,22 +53,20 @@ Plot.prototype.generateCanvas = function (div) {
 
     div.style.position = "relative";
     div.style.overflow = "hidden";
-    // div.style.right = "0px";
     div.style.top = "0px";
     div.style.left = "0px";
-    // div.style.bottom = "0px";
 
     canvas.style.position = "absolute";
-    // canvas.style.right = "0px";
     canvas.style.top = "0px";
     canvas.style.left = "0px";
-    // canvas.style.bottom = "0px";
     canvas.style.height = this.height + "px";
     canvas.style.width = this.width + "px";
 
     div.innerHTML = "";
     div.appendChild(canvas);
     this.canvas = canvas;
+    this.ctx = this.canvas.getContext("2d");
+    this.canvas.style["background-color"] = this.backgroundColor;
 }
 
 Plot.prototype.applyDefaultSettings = function () {
@@ -100,6 +99,7 @@ Plot.prototype.applyDefaultSettings = function () {
         dataPointLinewidth: 2,
         xHighlight: [],
         yHighlight: [],
+        interpolationSteps: 0,
     }
     var defaultShadowGraphSettings = {
         color: "#fff",
@@ -108,6 +108,7 @@ Plot.prototype.applyDefaultSettings = function () {
         dataPointRadius: 1.5,
         xHighlight: [],
         yHighlight: [],
+        interpolationSteps: 0,
     }
 
     for (var j in defaultPlotSettings) {
@@ -134,6 +135,14 @@ Plot.prototype.applyDefaultSettings = function () {
     }
 }
 Plot.prototype.calculateDataRanges = function () {
+    for (var i = 0; i < this.graphs.length; i++) {
+        const graph = this.graphs[i];
+
+        if (graph.interpolate == "polynomial") {
+            this.polinomialInterpolation(graph);
+        }
+    }
+
     this.allXData = [];
     this.allYData = [];
     for (var i = 0; i < this.graphs.length; i++) {
@@ -142,6 +151,7 @@ Plot.prototype.calculateDataRanges = function () {
         this.allYData = this.allYData.concat(this.graphs[i].y);
         this.allYData = this.allYData.concat(this.graphs[i].yHighlight);
     }
+    if (this.allXData.length != this.allYData.length) console.warn("Not the same amount of x and y values. Plot is probably wrong!")
     this.minX = Math.min.apply(null, this.allXData);
     this.minY = Math.min.apply(null, this.allYData);
     this.maxX = Math.max.apply(null, this.allXData);
@@ -573,4 +583,63 @@ Plot.prototype.doWhenLoaded = function (callback) {
             c();
         }.bind(this));
     }
+}
+
+Plot.prototype.polinomialInterpolation = function (graph) {
+    xValues = graph.x;
+    yValues = graph.y;
+
+
+    var coefficients = [];
+    var coeffMatrix = [];
+
+    for (var i = 0; i < xValues.length; i++) {
+        var aitkenRow = [xValues[i], yValues[i]];
+        coeffMatrix.push(aitkenRow);
+
+        for (var j = 2; j <= i + 1; j++) {
+            coeffMatrix[coeffMatrix.length - 1] = aitkenRow;
+            const l = coeffMatrix.length - 1;
+            const newEntryZaehler = (coeffMatrix[l][j - 1] - coeffMatrix[l - 1][j - 1])
+            const newEntryNenner = (coeffMatrix[l][0] - coeffMatrix[l - j + 1][0]);
+
+            aitkenRow.push(newEntryZaehler / newEntryNenner);
+        }
+        coefficients.push(aitkenRow[aitkenRow.length - 1]);
+    }
+    // console.log(coefficients)
+
+    graph.interpolationCoefficients = coefficients;
+
+    function interpolationPolynomial(x) {
+        var xTerm = 1;
+        var y = 0;
+        for (var i = 0; i < coefficients.length; i++) {
+            y += coefficients[i] * xTerm;
+            xTerm *= x - xValues[i];
+        }
+        return y;
+    }
+
+    const xLength = xValues[xValues.length - 1] - xValues[0];
+    const stepsize = xLength / (this.interpolationSteps - 1);
+    interpolatedDataX = [];
+    interpolatedDataY = [];
+    for (var i = 0; i < this.interpolationSteps; i++) {
+        const x = i * stepsize + xValues[0];
+        const y = interpolationPolynomial(x);
+        interpolatedDataX.push(x);
+        interpolatedDataY.push(y);
+    }
+    graph.x = interpolatedDataX;
+    graph.y = interpolatedDataY;
+}
+
+
+function logAitken(aitkenRow) {
+    var row = "";
+    for (k = 0; k < aitkenRow.length; k++) {
+        row += " " + aitkenRow[k];
+    }
+    console.log(row)
 }
