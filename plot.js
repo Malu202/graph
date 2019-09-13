@@ -586,8 +586,8 @@ Plot.prototype.doWhenLoaded = function (callback) {
 }
 
 Plot.prototype.polinomialInterpolation = function (graph) {
-    xValues = graph.x;
-    yValues = graph.y;
+    const xValues = graph.x;
+    const yValues = graph.y;
 
 
     var coefficients = [];
@@ -623,8 +623,8 @@ Plot.prototype.polinomialInterpolation = function (graph) {
 
     const xLength = xValues[xValues.length - 1] - xValues[0];
     const stepsize = xLength / (this.interpolationSteps - 1);
-    interpolatedDataX = [];
-    interpolatedDataY = [];
+    var interpolatedDataX = [];
+    var interpolatedDataY = [];
     for (var i = 0; i < this.interpolationSteps; i++) {
         const x = i * stepsize + xValues[0];
         const y = interpolationPolynomial(x);
@@ -633,13 +633,4 @@ Plot.prototype.polinomialInterpolation = function (graph) {
     }
     graph.x = interpolatedDataX;
     graph.y = interpolatedDataY;
-}
-
-
-function logAitken(aitkenRow) {
-    var row = "";
-    for (k = 0; k < aitkenRow.length; k++) {
-        row += " " + aitkenRow[k];
-    }
-    console.log(row)
 }
