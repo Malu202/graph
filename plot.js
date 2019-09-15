@@ -140,6 +140,8 @@ Plot.prototype.calculateDataRanges = function () {
 
         if (graph.interpolate == "polynomial") {
             this.polinomialInterpolation(graph);
+        } else if (graph.interpolate == "spline") {
+            this.splineInterpolation(graph);
         }
     }
 
@@ -607,9 +609,8 @@ Plot.prototype.polinomialInterpolation = function (graph) {
         }
         coefficients.push(aitkenRow[aitkenRow.length - 1]);
     }
-    // console.log(coefficients)
 
-    graph.interpolationCoefficients = coefficients;
+    // graph.interpolationCoefficients = coefficients;
 
     function interpolationPolynomial(x) {
         var xTerm = 1;
@@ -634,3 +635,77 @@ Plot.prototype.polinomialInterpolation = function (graph) {
     graph.x = interpolatedDataX;
     graph.y = interpolatedDataY;
 }
+
+Plot.prototype.splineInterpolation = function (graph) {
+    var B = graph.y;
+    var N = B.length;
+    var r = Math.sqrt(3) + 2;
+
+    var zeros = [];
+    for (var i = 0; i < N; i++) {
+        zeros.push(0);
+    }
+    var alpha = zeros.slice();;
+    var X = zeros.slice();;
+
+    alpha[0] = 0;
+    alpha[N - 1] = B[N - 1];
+
+    for (var i = 1; i <= N - 1; i++) {
+        for (var k = 1; k <= i; k++) {
+            alpha[i - 1] = alpha[i - 1] + Math.pow(-1, k - 1) * B[i - k] / (Math.pow(r, k))
+        }
+    }
+    for (var i = 1; i <= N; i++) {
+        for (var k = 1; k <= (N - i + 1); k++) {
+            X[i - 1] = X[i - 1] + Math.pow(-1 / r, k - 1) * alpha[i + k - 2];
+        }
+    }
+
+    function spline(x) {
+        var index = 0;
+        for (var i = 0; i < graph.x.length; i++) {
+            if ((i + 1 == graph.x.length - 1) || (x < graph.x[i + 1])) {
+                index = i;
+                break;
+            }
+        }
+        // console.log(index)
+        // X = alpha.slice();
+        const splineTerm1 = (X[index] / 6) * (Math.pow(x - graph.x[index + 1], 3) / (graph.x[index] - graph.x[index + 1]) - (x - graph.x[index + 1]) * (graph.x[index] - graph.x[index + 1]));
+        const splineTerm2 = (X[index + 1] / 6) * (Math.pow(x - graph.x[index], 3) / (graph.x[index] - graph.x[index + 1]) - (x - graph.x[index]) * (graph.x[index] - graph.x[index + 1]));
+        const splineTerm3 = (graph.y[index] * (x - graph.x[index + 1]) - graph.y[index] * (x - graph.x[index])) / (graph.x[index] - graph.x[index + 1]);
+        return splineTerm1 - splineTerm2 + splineTerm3;
+    }
+    console.log("X: ", X)
+    console.log("a: ", alpha);
+
+
+    console.log("real y: ", graph.y)
+    var test = [];
+    for (var i = 0; i < graph.x.length; i++) {
+        // for (var i = 0; i < 1; i++) {
+        test.push(spline(graph.x[i]));
+    }
+
+    const steps = 90;
+    var stepsize = (graph.x[graph.x.length - 1] - graph.x[0]) / (steps-1);
+    var newX = [];
+    var newY = [];
+    for (var j = 0; j < steps; j++) {
+        var x = graph.x[0] + j * stepsize;
+        // console.log(x)
+        newX[j] = x;
+        newY[j] = spline(x)
+    }
+
+    console.log("interp: ", test);
+    console.log("vgl: ", spline(1.5))
+    
+    graph.x = newX;
+    graph.y = newY;
+}
+
+
+
+

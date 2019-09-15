@@ -85,22 +85,24 @@ window.onload = function () {
         graphs: [
             {
                 type: "line",
-                interpolate: "polynomial",
+                interpolate: "spline",
                 color: WHITE,
                 linewidth: 5,
                 dataPointRadius: 4,
                 dataPointLinewidth: 2,
                 // x: mockupDataX,
                 // y: mockupDataY,
-                x: mockupDataX,
-                y: mockupDataY,
+                x: [1, 2, 3, 4, 5],
+                y: [0, 1, 0, 1, 0],
 
                 // x: mockupGraph1.x,
                 // y: mockupGraph1.y,
                 // xHighlight: mockupGraph1.xHighlight,
                 // yHighlight: mockupGraph1.yHighlight
-                xHighlight: mockupDataX,
-                yHighlight: mockupDataY,
+                // xHighlight: mockupDataX,
+                // yHighlight: mockupDataY,
+                xHighlight: [1, 2, 3, 4, 5],                
+                yHighlight: [0, 1, 0, 1, 0],
 
             }
             // ,
