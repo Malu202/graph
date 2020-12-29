@@ -101,7 +101,7 @@ window.onload = function () {
                 // yHighlight: mockupGraph1.yHighlight
                 // xHighlight: mockupDataX,
                 // yHighlight: mockupDataY,
-                xHighlight: [1, 2, 3, 4, 5],                
+                xHighlight: [1, 2, 3, 4, 5],
                 yHighlight: [0, 1, 0, 1, 0],
 
             }
@@ -128,6 +128,6 @@ window.onload = function () {
 
 var gaugeCanvas = document.getElementById("gauge");
 
-var gauge = new Gauge(gaugeCanvas, "", 25, "°", 5, 40, "#fff", "#000");
+var gauge = new Gauge(gaugeCanvas, "", 20, "°", 0, 40, "#fff", "#000");
 
-gauge.animateValue(25, 800)
+gauge.animateValue(20.1, 800)

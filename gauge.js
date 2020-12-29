@@ -72,7 +72,7 @@ Gauge.prototype.generateCanvas = function (div) {
 }
 
 Gauge.prototype.setValue = function (value, displayValue) {
-    if(displayValue == undefined) displayValue = value;
+    if (displayValue == undefined) displayValue = value;
     this.ctx.clearRect(0, 0, this.width, this.height);
 
     const missingDigits = (this.max + "").length - (displayValue + "").length;
@@ -82,8 +82,19 @@ Gauge.prototype.setValue = function (value, displayValue) {
     }
 
     const textString = missingDigitPrefix + this.prefix + displayValue + this.suffix + "";
-    const textSize = this.size / textString.length;
-    this.ctx.font = "bold " + textSize + "px Arial, Helvetica, sans-serif";
+    let fontSize = 200;
+    this.ctx.font = "bold " + fontSize + "px monospace, Arial, Helvetica, sans-serif";
+
+    let textSize = this.ctx.measureText(textString).width;
+    // fontSize *= this.size / textSize;
+    // this.ctx.font = "bold " + fontSize + "px Arial, Helvetica, sans-serif, monospace";
+
+    let radius = 0.9 * this.size / 2;
+    let aspectRatio = textSize / fontSize;
+    fontSize = Math.sqrt((radius * radius) / (1 / 4 + aspectRatio * aspectRatio / 4))
+    fontSize = Math.round(fontSize * 0.85);
+
+    this.ctx.font = "bold " + fontSize + "px monospace, Arial, Helvetica, sans-serif";
     this.ctx.fillStyle = this.textColor;
     this.ctx.textAlign = "center";
     this.ctx.textBaseline = "middle";
@@ -101,6 +112,13 @@ Gauge.prototype.setValue = function (value, displayValue) {
     const endAngle = Math.PI / 4 - (1 - interPolationValue) * (Math.PI + Math.PI / 2);
     this.ctx.arc(this.width / 2, this.height / 2, 0.9 * this.size / 2, startAngle, endAngle, false);
     this.ctx.stroke();
+
+    // SHOW BOUNDING BOX:
+    // let l = this.ctx.measureText(textString).width;
+    // this.ctx.strokeStyle = this.textColor;
+    // this.ctx.lineWidth = 2;
+    // this.ctx.rect(this.width / 2 - l * 0.5, this.height / 2 - fontSize * 0.5, l, fontSize)
+    // this.ctx.stroke()
 }
 
 Gauge.prototype.animateValue = function (value, animationTime) {
